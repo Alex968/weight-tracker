@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2092/2092063.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2621/2621123.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
@@ -18,96 +18,94 @@
         :root { 
             --neon-green: #00ff9d; 
             --neon-blue: #00d4ff; 
-            --danger: #ff4d4d; 
             --bg: #05070a; 
             --panel: #11141b;
             --border: #232936;
         }
         
-        body { 
+        /* 强制全屏且不滚动，防止录入框跑掉 */
+        html, body { 
+            height: 100%; margin: 0; padding: 0; overflow: hidden;
             background: var(--bg); color: #e0e6ed; 
             font-family: -apple-system, "PingFang SC", sans-serif; 
-            margin: 0; padding: 0; height: 100vh; overflow: hidden;
-            display: flex; flex-direction: column; align-items: center;
         }
 
         .dashboard { 
-            width: 100%; max-width: 500px; height: 100%;
-            background: var(--panel); display: flex; flex-direction: column;
-            padding: env(safe-area-inset-top) 20px 0 20px;
+            display: flex; flex-direction: column;
+            height: 100vh; width: 100%; max-width: 500px; margin: 0 auto;
             box-sizing: border-box;
-            border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+            padding: env(safe-area-inset-top) 15px env(safe-area-inset-bottom) 15px;
         }
 
-        .header { border-left: 3px solid var(--neon-green); padding-left: 12px; margin: 20px 0; flex-shrink: 0; }
-        .title { margin: 0; font-size: 1.2rem; font-weight: 800; letter-spacing: 1px; color: #fff; }
-        .tag { color: var(--neon-green); font-size: 0.65rem; font-family: monospace; letter-spacing: 2px; }
-        
-        /* 数据看板 */
-        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-        .stat-box { background: rgba(255,255,255,0.02); padding: 12px 5px; border-radius: 8px; text-align: center; border: 1px solid var(--border); }
-        .stat-label { font-size: 0.6rem; color: #788291; margin-bottom: 4px; }
-        .stat-val { font-size: 1.2rem; font-weight: 800; color: var(--neon-blue); font-family: 'DIN Condensed', sans-serif; }
+        /* 头部和数据看板固定，不缩减 */
+        .header-section { flex-shrink: 0; }
 
-        /* 输入区 */
-        .input-area { background: rgba(0, 255, 157, 0.03); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(0, 255, 157, 0.1); }
+        .header { border-left: 3px solid var(--neon-green); padding-left: 12px; margin: 15px 0 10px 0; }
+        .title { margin: 0; font-size: 1.1rem; font-weight: 800; color: #fff; }
+        
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
+        .stat-box { background: rgba(255,255,255,0.02); padding: 10px 5px; border-radius: 8px; text-align: center; border: 1px solid var(--border); }
+        .stat-label { font-size: 0.6rem; color: #788291; margin-bottom: 4px; }
+        .stat-val { font-size: 1.1rem; font-weight: 800; color: var(--neon-blue); }
+
+        /* 录入区：强制固定，不被挤出屏幕 */
+        .input-area { 
+            flex-shrink: 0; 
+            background: rgba(0, 255, 157, 0.05); padding: 12px; 
+            border-radius: 10px; margin-bottom: 15px; border: 1px solid rgba(0, 255, 157, 0.1); 
+        }
         .input-row { display: flex; gap: 8px; }
         input { 
             background: #000; border: 1px solid var(--border); color: #fff; 
-            padding: 12px; border-radius: 6px; outline: none; font-size: 0.9rem; flex: 1;
+            padding: 10px; border-radius: 6px; outline: none; font-size: 0.9rem; flex: 1;
         }
-        input:focus { border-color: var(--neon-green); }
         .pub-btn { 
             background: var(--neon-green); color: #000; border: none; 
-            padding: 0 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem;
+            padding: 0 15px; border-radius: 6px; cursor: pointer; font-weight: bold; 
         }
 
-        /* 图表区 */
+        /* 中间内容区：可伸缩 */
         .chart-container { 
-            flex: 1.2; min-height: 180px; background: rgba(0,0,0,0.2); 
-            border-radius: 12px; padding: 10px; position: relative; margin-bottom: 15px;
-            border: 1px solid var(--border);
+            flex: 1.5; min-height: 150px; background: rgba(0,0,0,0.2); 
+            border-radius: 12px; padding: 10px; margin-bottom: 10px;
+            border: 1px solid var(--border); position: relative;
         }
         
-        /* 表格区 */
-        .table-wrapper { flex: 0.8; overflow-y: auto; border-top: 1px solid var(--border); }
+        .table-wrapper { 
+            flex: 1; overflow-y: auto; border-top: 1px solid var(--border);
+            -webkit-overflow-scrolling: touch;
+        }
+        
         table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        th { position: sticky; top: 0; background: var(--panel); padding: 10px; border-bottom: 1px solid var(--border); color: #788291; text-align: left; }
-        td { padding: 10px; border-bottom: 1px solid #1a1e26; }
+        th { position: sticky; top: 0; background: var(--panel); padding: 8px; border-bottom: 1px solid var(--border); color: #788291; text-align: left; }
+        td { padding: 8px; border-bottom: 1px solid #1a1e26; }
         .edit-input { width: 50px; background: transparent; border: none; color: var(--neon-blue); text-align: center; font-weight: bold; }
 
-        .footer-tools { display: flex; gap: 8px; padding: 10px 0; justify-content: center; }
-        .btn-tool { 
-            border: 1px solid var(--border); color: #788291; font-size: 0.65rem; 
-            padding: 4px 10px; border-radius: 4px; background: transparent;
-        }
+        .footer-tools { flex-shrink: 0; display: flex; gap: 8px; padding: 10px 0; justify-content: center; }
+        .btn-tool { border: 1px solid var(--border); color: #788291; font-size: 0.65rem; padding: 4px 8px; border-radius: 4px; background: transparent; }
         
-        .version-footer {
-            font-size: 0.6rem; color: #232936; font-family: monospace;
-            padding-bottom: env(safe-area-inset-bottom);
-            margin-bottom: 10px; text-align: center; letter-spacing: 2px;
-        }
+        .version-footer { flex-shrink: 0; font-size: 0.6rem; color: #232936; text-align: center; padding-bottom: 5px; letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
 <div class="dashboard">
-    <div class="header">
-        <div class="title">健康体重运营系统</div>
-        <div class="tag">OPERATIONAL MONITORING V1.2</div>
-    </div>
-
-    <div class="stats">
-        <div class="stat-box"><div class="stat-label">初始最高</div><div id="maxWeight" class="stat-val">---</div></div>
-        <div class="stat-box"><div class="stat-label">当前记录</div><div id="curMin" class="stat-val">---</div></div>
-        <div class="stat-box"><div class="stat-label">运营目标</div><div class="stat-val" style="color:var(--neon-green)">180</div></div>
+    <div class="header-section">
+        <div class="header">
+            <div class="title">健康体重运营系统</div>
+        </div>
+        <div class="stats">
+            <div class="stat-box"><div class="stat-label">初始最高</div><div id="maxWeight" class="stat-val">---</div></div>
+            <div class="stat-box"><div class="stat-label">当前记录</div><div id="curMin" class="stat-val">---</div></div>
+            <div class="stat-box"><div class="stat-label">运营目标</div><div class="stat-val" style="color:var(--neon-green)">180</div></div>
+        </div>
     </div>
 
     <div class="input-area">
         <div class="input-row">
             <input type="date" id="dateIn">
-            <input type="number" id="weightIn" step="0.1" placeholder="当前体重(斤)">
-            <button class="pub-btn" onclick="save()">录入</button>
+            <input type="number" id="weightIn" step="0.1" placeholder="斤">
+            <button class="pub-btn" onclick="save()">发布</button>
         </div>
     </div>
 
@@ -117,22 +115,21 @@
 
     <div class="table-wrapper">
         <table>
-            <thead><tr><th>运营日期</th><th>最低记录</th><th>最高记录</th></tr></thead>
+            <thead><tr><th>运营日期</th><th>最低</th><th>最高</th></tr></thead>
             <tbody id="logList"></tbody>
         </table>
     </div>
 
     <div class="footer-tools">
-        <button class="btn-tool" onclick="chart.resetZoom()">重置缩放</button>
-        <button class="btn-tool" onclick="exportCSV()">导出报表</button>
-        <button class="btn-tool" style="color:var(--danger)" onclick="resetAll()">格式化数据</button>
+        <button class="btn-tool" onclick="chart.resetZoom()">重置视图</button>
+        <button class="btn-tool" onclick="exportCSV()">导出</button>
+        <button class="btn-tool" style="color:var(--neon-blue)" onclick="resetAll()">清空</button>
     </div>
     
     <div class="version-footer">CORE_KERNEL_UPDATE_V1.2</div>
 </div>
 
 <script>
-    // 自动兼容之前的存储键名
     let dataMap = JSON.parse(localStorage.getItem('health_ops_v1.1')) || {};
     let chart;
 
@@ -172,11 +169,9 @@
         const body = document.getElementById('logList');
         const sortedDates = Object.keys(dataMap).sort((a,b) => new Date(a) - new Date(b));
         
-        // 核心逻辑：自动识别全局最高
+        // 自动识别最高体重
         let globalMax = 0;
-        sortedDates.forEach(d => {
-            if(dataMap[d].max > globalMax) globalMax = dataMap[d].max;
-        });
+        sortedDates.forEach(d => { if(dataMap[d].max > globalMax) globalMax = dataMap[d].max; });
         
         body.innerHTML = '';
         [...sortedDates].reverse().forEach(d => {
@@ -187,7 +182,7 @@
             </tr>`;
         });
 
-        document.getElementById('maxWeight').innerText = globalMax > 0 ? globalMax : '待录入';
+        document.getElementById('maxWeight').innerText = globalMax > 0 ? globalMax : '---';
         if(sortedDates.length > 0) {
             document.getElementById('curMin').innerText = dataMap[sortedDates[sortedDates.length-1]].min;
         }
@@ -200,58 +195,34 @@
             data: {
                 labels: sortedDates,
                 datasets: [
-                    { 
-                        label: '最高', 
-                        data: sortedDates.map(d => dataMap[d].max), 
-                        borderColor: 'rgba(255, 77, 77, 0.5)', 
-                        borderWidth: 1, 
-                        pointRadius: 0, 
-                        tension: 0.4 
-                    },
-                    { 
-                        label: '最低', 
-                        data: sortedDates.map(d => dataMap[d].min), 
-                        borderColor: '#00ff9d', 
-                        borderWidth: 3, 
-                        fill: true, 
-                        backgroundColor: 'rgba(0, 255, 157, 0.05)', 
-                        tension: 0.4,
-                        pointBackgroundColor: '#00ff9d'
-                    }
+                    { label: '最低', data: sortedDates.map(d => dataMap[d].min), borderColor: '#00ff9d', borderWidth: 2, fill: true, backgroundColor: 'rgba(0, 255, 157, 0.05)', tension: 0.3 }
                 ]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 scales: { 
                     y: { 
-                        min: 0, // 关键：锁定最小值，不显示负数
-                        beginAtZero: false, // 避免 0 刻度过于突兀
+                        min: 0, 
+                        beginAtZero: true, // 强制从0开始，消除负数空间
                         grid: { color: 'rgba(255,255,255,0.03)' }, 
-                        ticks: { 
-                            color: '#4a5568', 
-                            font: { size: 10 },
-                            callback: (val) => val >= 0 ? val : null // 双重保险：过滤负数刻度
-                        } 
+                        ticks: { color: '#4a5568', font: { size: 10 } } 
                     },
                     x: { ticks: { color: '#4a5568', font: { size: 10 } } }
                 },
-                plugins: { 
-                    legend: { display: false }, 
-                    zoom: { pan: { enabled: true, mode: 'x' }, zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' } } 
-                }
+                plugins: { legend: { display: false } }
             }
         });
     }
 
     function exportCSV() {
         const sortedDates = Object.keys(dataMap).sort((a,b) => new Date(a) - new Date(b));
-        let csv = "\ufeff日期,最低记录,最高记录\n";
+        let csv = "\ufeff日期,最低,最高\n";
         sortedDates.forEach(d => csv += `${d},${dataMap[d].min},${dataMap[d].max}\n`);
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `健康体重报表_V1.2.csv`; link.click();
+        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `健康报表.csv`; link.click();
     }
 
-    function resetAll() { if(confirm("警告：将永久清除所有运营数据，是否继续？")) { dataMap = {}; localStorage.clear(); render(); } }
+    function resetAll() { if(confirm("确定清空数据？")) { dataMap = {}; localStorage.clear(); render(); } }
 </script>
 </body>
 </html>
