@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>系统重构 V2.3 - 支持缩放</title>
+    <title>系统重构 V2.4 - 数据导出版</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
@@ -19,12 +19,12 @@
         input { background: #010409; border: 1px solid #30363d; color: var(--green); padding: 12px; border-radius: 6px; flex: 1; outline: none; }
         button { background: transparent; border: 1px solid var(--green); color: var(--green); padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         button:hover { background: var(--green); color: #000; }
-        .chart-container { height: 350px; margin-bottom: 20px; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; position: relative; }
-        .zoom-hint { position: absolute; top: 5px; right: 10px; font-size: 0.6rem; color: #8b949e; pointer-events: none; }
+        .chart-container { height: 320px; margin-bottom: 20px; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; position: relative; }
+        .export-group { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+        .btn-export { border-color: #8b949e; color: #8b949e; font-size: 0.8rem; }
         table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-top: 10px; }
         th, td { padding: 12px 10px; border-bottom: 1px solid #21262d; text-align: left; }
-        .edit-input { width: 70px; background: #000; border: 1px solid var(--blue); color: #fff; padding: 5px; border-radius: 4px; }
-        .reset-zoom { font-size: 0.7rem; padding: 4px 8px; border-color: #8b949e; color: #8b949e; }
+        .edit-input { width: 70px; background: #000; border: 1px solid var(--blue); color: #fff; padding: 5px; border-radius: 4px; border: none; }
     </style>
 </head>
 <body>
@@ -33,25 +33,29 @@
     <div class="header">
         <div>
             <h2 style="margin:0">系统重构监测中心</h2>
-            <small style="color:#8b949e">交互模式：支持缩放与平移</small>
+            <small style="color:#8b949e">V2.4 数据备份模式</small>
         </div>
-        <button class="reset-zoom" onclick="resetZoom()">重置视图</button>
+        <button style="font-size:0.7rem" onclick="chart.resetZoom()">重置缩放</button>
     </div>
 
     <div class="stats">
-        <div class="stat-box"><div style="font-size:0.7rem">初始</div><div class="stat-val">280</div></div>
+        <div class="stat-box"><div style="font-size:0.7rem">初始 (斤)</div><div class="stat-val">280</div></div>
         <div class="stat-box"><div style="font-size:0.7rem">今日最低</div><div id="curMin" class="stat-val">---</div></div>
-        <div class="stat-box" style="border:1px solid var(--green)"><div style="font-size:0.7rem">目标</div><div class="stat-val" style="color:var(--green)">180</div></div>
+        <div class="stat-box" style="border:1px solid var(--green)"><div style="font-size:0.7rem">目标 (斤)</div><div class="stat-val" style="color:var(--green)">180</div></div>
     </div>
 
     <div class="input-group">
-        <input type="number" id="weightIn" step="0.1" placeholder="录入当前体重 (斤)">
-        <button onclick="save()">录入数据</button>
+        <input type="number" id="weightIn" step="0.1" placeholder="录入体重 (斤)">
+        <button onclick="save()">录入</button>
     </div>
 
     <div class="chart-container">
-        <span class="zoom-hint">手机:双指缩放 | 电脑:滚轮缩放</span>
         <canvas id="myChart"></canvas>
+    </div>
+
+    <div class="export-group">
+        <button class="btn-export" onclick="exportMarkdown()">导出 Markdown</button>
+        <button class="btn-export" onclick="exportCSV()">导出 Excel (CSV)</button>
     </div>
 
     <table>
@@ -59,11 +63,11 @@
         <tbody id="logList"></tbody>
     </table>
     
-    <button onclick="resetAll()" style="margin-top:30px; border-color:var(--red); color:var(--red); font-size:0.7rem; width:100%">清空所有本地数据</button>
+    <button onclick="resetAll()" style="margin-top:40px; border-color:var(--red); color:var(--red); font-size:0.7rem; width:100%">清空本地存储</button>
 </div>
 
 <script>
-    let dataMap = JSON.parse(localStorage.getItem('weightMap_v2.3')) || {};
+    let dataMap = JSON.parse(localStorage.getItem('weightMap_v2.4')) || {};
     let chart;
 
     function save() {
@@ -81,12 +85,10 @@
     }
 
     function store() {
-        localStorage.setItem('weightMap_v2.3', JSON.stringify(dataMap));
+        localStorage.setItem('weightMap_v2.4', JSON.stringify(dataMap));
         document.getElementById('weightIn').value = '';
         render();
     }
-
-    function resetZoom() { if(chart) chart.resetZoom(); }
 
     function render() {
         const body = document.getElementById('logList');
@@ -106,7 +108,6 @@
 
         const ctx = document.getElementById('myChart').getContext('2d');
         if(chart) chart.destroy();
-
         chart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -117,28 +118,48 @@
                 ]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: { 
-                    y: { suggestedMin: 170, grid: { color: '#21262d' }, ticks: { color: '#8b949e' } },
-                    x: { grid: { display: false }, ticks: { color: '#8b949e' } }
-                },
-                plugins: {
-                    legend: { labels: { color: '#8b949e', boxWidth: 12 } },
-                    zoom: {
-                        pan: { enabled: true, mode: 'x' },
-                        zoom: {
-                            wheel: { enabled: true },
-                            pinch: { enabled: true },
-                            mode: 'x',
-                        }
-                    }
-                }
+                responsive: true, maintainAspectRatio: false,
+                scales: { y: { suggestedMin: 170, grid: { color: '#21262d' } }, x: { grid: { display: false } } },
+                plugins: { zoom: { pan: { enabled: true, mode: 'x' }, zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' } } }
             }
         });
     }
 
-    function resetAll() { if(confirm("确定永久清空所有记录？")) { dataMap = {}; localStorage.clear(); render(); } }
+    // 导出 Markdown
+    function exportMarkdown() {
+        const sortedDates = Object.keys(dataMap).sort((a,b) => new Date(a) - new Date(b));
+        let md = "| 日期 | 最小值 (斤) | 最大值 (斤) |\n| --- | --- | --- |\n";
+        sortedDates.forEach(d => {
+            md += `| ${d} | ${dataMap[d].min} | ${dataMap[d].max} |\n`;
+        });
+        copyToClipboard(md, "Markdown 数据已复制到剪贴板！");
+    }
+
+    // 导出 CSV (Excel)
+    function exportCSV() {
+        const sortedDates = Object.keys(dataMap).sort((a,b) => new Date(a) - new Date(b));
+        let csv = "\ufeff日期,最小值(斤),最大值(斤)\n";
+        sortedDates.forEach(d => {
+            csv += `${d},${dataMap[d].min},${dataMap[d].max}\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `weight_data_${new Date().toLocaleDateString()}.csv`;
+        link.click();
+    }
+
+    function copyToClipboard(text, msg) {
+        const el = document.createElement('textarea');
+        el.value = text;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        alert(msg);
+    }
+
+    function resetAll() { if(confirm("确定永久清空？")) { dataMap = {}; localStorage.clear(); render(); } }
     render();
 </script>
 </body>
