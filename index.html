@@ -3,161 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>TERMINAL - 重构计划 V2.1</title>
+    <title>系统重构 V2.3 - 支持缩放</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
     <style>
-        :root {
-            --neon-green: #00ff41;
-            --neon-blue: #00d4ff;
-            --bg-dark: #0a0b10;
-            --card-bg: #161b22;
-            --text-gray: #8b949e;
-        }
-        body { background-color: var(--bg-dark); color: white; font-family: 'Cascadia Code', monospace; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; min-height: 100vh; }
-        .dashboard { width: 100%; max-width: 900px; background: var(--card-bg); border: 1px solid #30363d; border-radius: 12px; padding: 20px; box-shadow: 0 0 20px rgba(0, 255, 65, 0.1); }
-        .header { border-left: 4px solid var(--neon-green); padding-left: 15px; margin-bottom: 20px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-        .stat-card { background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 8px; text-align: center; }
-        .stat-value { font-size: 1.5rem; font-weight: bold; color: var(--neon-blue); }
-        .input-section { display: flex; gap: 10px; margin-bottom: 20px; }
-        input { background: #0d1117; border: 1px solid #30363d; color: var(--neon-green); padding: 12px; border-radius: 4px; flex-grow: 1; font-size: 1rem; outline: none; }
-        button { background: transparent; border: 1px solid var(--neon-green); color: var(--neon-green); padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        button:hover { background: var(--neon-green); color: black; box-shadow: 0 0 15px var(--neon-green); }
-        .chart-box { background: rgba(0, 0, 0, 0.2); padding: 10px; border-radius: 8px; height: 300px; margin-bottom: 20px; }
-        .history-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        .history-table th { text-align: left; color: var(--text-gray); padding: 8px; border-bottom: 1px solid #30363d; }
-        .history-table td { padding: 8px; border-bottom: 1px solid #21262d; }
-        .tag-min { background: #238636; color: white; padding: 2px 5px; border-radius: 3px; font-size: 0.7rem; }
-        .tag-max { background: #da3633; color: white; padding: 2px 5px; border-radius: 3px; font-size: 0.7rem; }
+        :root { --green: #00ff41; --blue: #00d4ff; --red: #f85149; --bg: #0d1117; --card: #161b22; }
+        body { background: var(--bg); color: #c9d1d9; font-family: 'PingFang SC', monospace; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
+        .dashboard { width: 100%; max-width: 800px; background: var(--card); border: 1px solid #30363d; border-radius: 12px; padding: 20px; box-shadow: 0 0 20px rgba(0,255,65,0.1); }
+        .header { border-left: 4px solid var(--green); padding-left: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .stat-box { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; text-align: center; }
+        .stat-val { font-size: 1.4rem; font-weight: bold; color: var(--blue); }
+        .input-group { display: flex; gap: 8px; margin-bottom: 20px; }
+        input { background: #010409; border: 1px solid #30363d; color: var(--green); padding: 12px; border-radius: 6px; flex: 1; outline: none; }
+        button { background: transparent; border: 1px solid var(--green); color: var(--green); padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        button:hover { background: var(--green); color: #000; }
+        .chart-container { height: 350px; margin-bottom: 20px; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; position: relative; }
+        .zoom-hint { position: absolute; top: 5px; right: 10px; font-size: 0.6rem; color: #8b949e; pointer-events: none; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-top: 10px; }
+        th, td { padding: 12px 10px; border-bottom: 1px solid #21262d; text-align: left; }
+        .edit-input { width: 70px; background: #000; border: 1px solid var(--blue); color: #fff; padding: 5px; border-radius: 4px; }
+        .reset-zoom { font-size: 0.7rem; padding: 4px 8px; border-color: #8b949e; color: #8b949e; }
     </style>
 </head>
 <body>
 
 <div class="dashboard">
     <div class="header">
-        <h1>SYSTEM RECON V2.1</h1>
-        <p>Log Filter: Daily Min/Max Mode</p>
-    </div>
-
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div style="font-size:0.7rem; color:var(--text-gray)">START</div>
-            <div class="stat-value">280</div>
+        <div>
+            <h2 style="margin:0">系统重构监测中心</h2>
+            <small style="color:#8b949e">交互模式：支持缩放与平移</small>
         </div>
-        <div class="stat-card">
-            <div style="font-size:0.7rem; color:var(--text-gray)">CURRENT (MIN)</div>
-            <div id="curWeight" class="stat-value">---</div>
-        </div>
-        <div class="stat-card" style="border: 1px solid var(--neon-green)">
-            <div style="font-size:0.7rem; color:var(--text-gray)">TARGET</div>
-            <div class="stat-value" style="color:var(--neon-green)">180</div>
-        </div>
+        <button class="reset-zoom" onclick="resetZoom()">重置视图</button>
     </div>
 
-    <div class="input-section">
-        <input type="number" id="wInput" step="0.1" placeholder="INPUT WEIGHT (斤)...">
-        <button onclick="commitData()">UPDATE</button>
+    <div class="stats">
+        <div class="stat-box"><div style="font-size:0.7rem">初始</div><div class="stat-val">280</div></div>
+        <div class="stat-box"><div style="font-size:0.7rem">今日最低</div><div id="curMin" class="stat-val">---</div></div>
+        <div class="stat-box" style="border:1px solid var(--green)"><div style="font-size:0.7rem">目标</div><div class="stat-val" style="color:var(--green)">180</div></div>
     </div>
 
-    <div class="chart-box">
-        <canvas id="weightChart"></canvas>
+    <div class="input-group">
+        <input type="number" id="weightIn" step="0.1" placeholder="录入当前体重 (斤)">
+        <button onclick="save()">录入数据</button>
     </div>
 
-    <table class="history-table">
-        <thead>
-            <tr>
-                <th>DATE</th>
-                <th>MIN / MAX RECORD</th>
-            </tr>
-        </thead>
-        <tbody id="logBody"></tbody>
+    <div class="chart-container">
+        <span class="zoom-hint">手机:双指缩放 | 电脑:滚轮缩放</span>
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <table>
+        <thead><tr><th>日期</th><th>最小值 (斤)</th><th>最大值 (斤)</th></tr></thead>
+        <tbody id="logList"></tbody>
     </table>
-    <button onclick="reset()" style="margin-top:20px; border-color:#da3633; color:#da3633; font-size:0.6rem;">WIPE SYSTEM DATA</button>
+    
+    <button onclick="resetAll()" style="margin-top:30px; border-color:var(--red); color:var(--red); font-size:0.7rem; width:100%">清空所有本地数据</button>
 </div>
 
 <script>
-    // 数据结构优化：{ "2023/10/24": { min: 278, max: 281 }, ... }
-    let rawData = JSON.parse(localStorage.getItem('dailyWeightLogs')) || {};
+    let dataMap = JSON.parse(localStorage.getItem('weightMap_v2.3')) || {};
     let chart;
 
-    function commitData() {
-        const val = parseFloat(document.getElementById('wInput').value);
+    function save() {
+        const val = parseFloat(document.getElementById('weightIn').value);
         if(!val) return;
-
         const today = new Date().toLocaleDateString();
-        
-        if(!rawData[today]) {
-            rawData[today] = { min: val, max: val };
-        } else {
-            rawData[today].min = Math.min(rawData[today].min, val);
-            rawData[today].max = Math.max(rawData[today].max, val);
-        }
-
-        localStorage.setItem('dailyWeightLogs', JSON.stringify(rawData));
-        document.getElementById('wInput').value = '';
-        refresh();
+        if(!dataMap[today]) { dataMap[today] = { min: val, max: val }; }
+        else { dataMap[today].min = Math.min(dataMap[today].min, val); dataMap[today].max = Math.max(dataMap[today].max, val); }
+        store();
     }
 
-    function refresh() {
-        const body = document.getElementById('logBody');
-        const curLabel = document.getElementById('curWeight');
+    function updateVal(date, type, val) {
+        const nVal = parseFloat(val);
+        if(!isNaN(nVal)) { dataMap[date][type] = nVal; store(); }
+    }
+
+    function store() {
+        localStorage.setItem('weightMap_v2.3', JSON.stringify(dataMap));
+        document.getElementById('weightIn').value = '';
+        render();
+    }
+
+    function resetZoom() { if(chart) chart.resetZoom(); }
+
+    function render() {
+        const body = document.getElementById('logList');
+        const sortedDates = Object.keys(dataMap).sort((a,b) => new Date(a) - new Date(b));
+        const displayDates = [...sortedDates].reverse();
+        
         body.innerHTML = '';
+        displayDates.forEach(d => {
+            body.innerHTML += `<tr>
+                <td>${d}</td>
+                <td><input class="edit-input" type="number" step="0.1" value="${dataMap[d].min}" onchange="updateVal('${d}','min',this.value)"></td>
+                <td><input class="edit-input" type="number" step="0.1" value="${dataMap[d].max}" onchange="updateVal('${d}','max',this.value)"></td>
+            </tr>`;
+        });
 
-        const dates = Object.keys(rawData).sort((a,b) => new Date(b) - new Date(a));
-        
-        if(dates.length > 0) {
-            curLabel.innerText = rawData[dates[0]].min;
-            
-            dates.forEach(date => {
-                const item = rawData[date];
-                body.innerHTML += `
-                    <tr>
-                        <td>${date}</td>
-                        <td>
-                            <span class="tag-min">MIN: ${item.min}</span> 
-                            <span class="tag-max">MAX: ${item.max}</span>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-        renderChart();
-    }
+        if(sortedDates.length > 0) document.getElementById('curMin').innerText = dataMap[displayDates[0]].min;
 
-    function renderChart() {
-        const ctx = document.getElementById('weightChart').getContext('2d');
+        const ctx = document.getElementById('myChart').getContext('2d');
         if(chart) chart.destroy();
 
-        const sortedDates = Object.keys(rawData).sort((a,b) => new Date(a) - new Date(b));
-        
         chart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: sortedDates,
-                datasets: [{
-                    label: 'Daily Min Weight',
-                    data: sortedDates.map(d => rawData[d].min),
-                    borderColor: '#00d4ff',
-                    backgroundColor: 'rgba(0, 212, 255, 0.1)',
-                    fill: true,
-                    tension: 0.3,
-                    pointRadius: 4
-                }]
+                datasets: [
+                    { label: '最高', data: sortedDates.map(d => dataMap[d].max), borderColor: '#f85149', borderWidth: 1, pointRadius: 1, tension: 0.3 },
+                    { label: '最低', data: sortedDates.map(d => dataMap[d].min), borderColor: '#00d4ff', borderWidth: 2, fill: true, backgroundColor: 'rgba(0,212,255,0.05)', tension: 0.3 }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: {
-                    y: { suggestedMin: 175, grid: { color: '#21262d' }, ticks: { color: '#8b949e' } },
+                scales: { 
+                    y: { suggestedMin: 170, grid: { color: '#21262d' }, ticks: { color: '#8b949e' } },
                     x: { grid: { display: false }, ticks: { color: '#8b949e' } }
                 },
-                plugins: { legend: { display: false } }
+                plugins: {
+                    legend: { labels: { color: '#8b949e', boxWidth: 12 } },
+                    zoom: {
+                        pan: { enabled: true, mode: 'x' },
+                        zoom: {
+                            wheel: { enabled: true },
+                            pinch: { enabled: true },
+                            mode: 'x',
+                        }
+                    }
+                }
             }
         });
     }
 
-    function reset() { if(confirm("DELETE ALL?")) { rawData = {}; localStorage.clear(); refresh(); } }
-    refresh();
+    function resetAll() { if(confirm("确定永久清空所有记录？")) { dataMap = {}; localStorage.clear(); render(); } }
+    render();
 </script>
 </body>
 </html>
