@@ -15,18 +15,18 @@
         .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
         .stat-box { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; text-align: center; border: 1px solid #21262d; }
         .stat-val { font-size: 1.6rem; font-weight: bold; color: var(--blue); text-shadow: 0 0 10px rgba(0,212,255,0.3); }
-        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
-        input { background: #010409; border: 1px solid #30363d; color: var(--green); padding: 12px; border-radius: 8px; flex: 1; outline: none; font-size: 1rem; }
+        .input-area { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px dashed #30363d; }
+        .input-row { display: flex; gap: 10px; margin-top: 10px; }
+        input { background: #010409; border: 1px solid #30363d; color: var(--green); padding: 12px; border-radius: 8px; outline: none; font-size: 1rem; }
+        #dateIn { flex: 1.2; color: var(--blue); } /* 日期选择器样式 */
+        #weightIn { flex: 2; }
         button { background: transparent; border: 1px solid var(--green); color: var(--green); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         button:hover { background: var(--green); color: #000; box-shadow: 0 0 15px var(--green); }
         .chart-container { height: 380px; margin-bottom: 20px; background: rgba(0,0,0,0.25); border-radius: 10px; padding: 10px; border: 1px solid #21262d; cursor: crosshair; }
-        .action-group { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
         .btn-tool { border-color: #484f58; color: #8b949e; font-size: 0.75rem; padding: 6px 12px; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
         th, td { padding: 12px; border-bottom: 1px solid #21262d; text-align: left; }
-        .edit-input { width: 65px; background: transparent; border: 1px solid transparent; color: #fff; padding: 4px; border-radius: 4px; text-align: center; transition: 0.3s; }
-        .edit-input:focus { border-color: var(--blue); background: #000; outline: none; }
-        .reset-btn { width: 100%; margin-top: 40px; border-color: #3e0a0a; color: #6e7681; font-size: 0.7rem; border-style: dashed; }
+        .edit-input { width: 65px; background: transparent; border: 1px solid transparent; color: #fff; text-align: center; }
     </style>
 </head>
 <body>
@@ -35,7 +35,7 @@
     <div class="header">
         <div>
             <h2 style="margin:0; letter-spacing: 1px;">健康体重运营系统</h2>
-            <small style="color:#58a6ff">Status: Running Optimized...</small>
+            <small style="color:#58a6ff">运营模式：支持历史回溯</small>
         </div>
         <button class="btn-tool" onclick="chart.resetZoom()">重置视图</button>
     </div>
@@ -46,16 +46,20 @@
         <div class="stat-box"><div style="font-size:0.7rem; color:#8b949e">运营目标</div><div class="stat-val" style="color:var(--green)">180</div></div>
     </div>
 
-    <div class="input-group">
-        <input type="number" id="weightIn" step="0.1" placeholder="录入指标数据 (斤)">
-        <button onclick="save()">发布更新</button>
+    <div class="input-area">
+        <div style="font-size: 0.75rem; color: #8b949e; margin-bottom: 5px;">选择日期并录入数据：</div>
+        <div class="input-row">
+            <input type="date" id="dateIn">
+            <input type="number" id="weightIn" step="0.1" placeholder="体重 (斤)">
+            <button onclick="save()">发布</button>
+        </div>
     </div>
 
     <div class="chart-container">
         <canvas id="myChart"></canvas>
     </div>
 
-    <div class="action-group">
+    <div style="display:flex; gap:10px; justify-content:center; margin-bottom:20px;">
         <button class="btn-tool" onclick="exportMarkdown()">复制 MD 表格</button>
         <button class="btn-tool" onclick="exportCSV()">导出 Excel</button>
     </div>
@@ -65,31 +69,43 @@
         <tbody id="logList"></tbody>
     </table>
     
-    <button class="reset-btn" onclick="resetAll()">格式化所有本地运营数据</button>
+    <button style="width:100%; margin-top:40px; border:1px dashed #3e0a0a; color:#6e7681; background:transparent; font-size:0.7rem; padding:10px;" onclick="resetAll()">格式化所有本地数据</button>
 </div>
 
 <script>
-    let dataMap = JSON.parse(localStorage.getItem('health_ops_v1')) || {};
+    let dataMap = JSON.parse(localStorage.getItem('health_ops_v2.7')) || {};
     let chart;
+
+    // 页面加载时自动设置日期为今天
+    window.onload = () => {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('dateIn').value = today;
+        render();
+    };
 
     function save() {
         const val = parseFloat(document.getElementById('weightIn').value);
-        if(!val) return;
-        const today = new Date().toLocaleDateString();
-        if(!dataMap[today]) { dataMap[today] = { min: val, max: val }; }
-        else { dataMap[today].min = Math.min(dataMap[today].min, val); dataMap[today].max = Math.max(dataMap[today].max, val); }
-        store();
+        const dateRaw = document.getElementById('dateIn').value;
+        if(!val || !dateRaw) return;
+
+        // 统一日期格式为本地字符串，保持排序一致性
+        const targetDate = new Date(dateRaw).toLocaleDateString();
+        
+        if(!dataMap[targetDate]) { 
+            dataMap[targetDate] = { min: val, max: val }; 
+        } else { 
+            dataMap[targetDate].min = Math.min(dataMap[targetDate].min, val); 
+            dataMap[targetDate].max = Math.max(dataMap[targetDate].max, val); 
+        }
+        
+        localStorage.setItem('health_ops_v2.7', JSON.stringify(dataMap));
+        document.getElementById('weightIn').value = '';
+        render();
     }
 
     function updateVal(date, type, val) {
         const nVal = parseFloat(val);
-        if(!isNaN(nVal)) { dataMap[date][type] = nVal; store(); }
-    }
-
-    function store() {
-        localStorage.setItem('health_ops_v1', JSON.stringify(dataMap));
-        document.getElementById('weightIn').value = '';
-        render();
+        if(!isNaN(nVal)) { dataMap[date][type] = nVal; localStorage.setItem('health_ops_v2.7', JSON.stringify(dataMap)); render(); }
     }
 
     function render() {
@@ -127,9 +143,8 @@
                     x: { grid: { display: false }, ticks: { color: '#484f58' } } 
                 },
                 plugins: { 
-                    legend: { display: true, labels: { color: '#8b949e', font: { size: 10 } } },
                     zoom: {
-                        pan: { enabled: true, mode: 'xy', threshold: 5 },
+                        pan: { enabled: true, mode: 'xy' },
                         zoom: { wheel: { enabled: true, speed: 0.08 }, pinch: { enabled: true }, mode: 'xy' }
                     }
                 }
@@ -142,7 +157,7 @@
         let md = "| 日期 | 最低 | 最高 |\n| --- | --- | --- |\n";
         sortedDates.forEach(d => md += `| ${d} | ${dataMap[d].min} | ${dataMap[d].max} |\n`);
         const el = document.createElement('textarea'); el.value = md; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
-        alert("Markdown 已就绪");
+        alert("Markdown 已复制");
     }
 
     function exportCSV() {
@@ -153,8 +168,7 @@
         const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `health_ops_data.csv`; link.click();
     }
 
-    function resetAll() { if(confirm("警告：确认清除所有历史运营数据？")) { dataMap = {}; localStorage.clear(); render(); } }
-    render();
+    function resetAll() { if(confirm("确定清除所有数据？")) { dataMap = {}; localStorage.clear(); render(); } }
 </script>
 </body>
 </html>
