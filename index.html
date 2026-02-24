@@ -12,7 +12,6 @@
     <style>
         :root { --green: #00ff41; --blue: #00d4ff; --red: #f85149; --bg: #0d1117; --card: #161b22; }
         
-        /* 核心适配：锁定视口高度，禁止全文滚动 */
         body { 
             background: var(--bg); color: #c9d1d9; font-family: 'PingFang SC', monospace; 
             margin: 0; padding: 0; height: 100vh; overflow: hidden;
@@ -26,7 +25,15 @@
             box-sizing: border-box;
         }
 
+        /* 标题动态效果 */
         .header { border-left: 4px solid var(--green); padding-left: 12px; margin: 15px 0; flex-shrink: 0; }
+        .monitoring-tag { 
+            color: var(--green); 
+            font-size: 0.7rem; 
+            letter-spacing: 1px;
+            animation: blink 2s infinite; 
+        }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
         
         .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; flex-shrink: 0; }
         .stat-box { background: rgba(255,255,255,0.03); padding: 8px; border-radius: 8px; text-align: center; border: 1px solid #21262d; }
@@ -39,18 +46,16 @@
         #weightIn { flex: 1.5; }
         button { background: transparent; border: 1px solid var(--green); color: var(--green); padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; flex-shrink: 0; }
 
-        /* 图表高度自适应 */
-        .chart-container { flex: 1; min-height: 200px; background: rgba(0,0,0,0.2); border-radius: 10px; padding: 8px; position: relative; margin-bottom: 15px; }
+        .chart-container { flex: 1; min-height: 180px; background: rgba(0,0,0,0.2); border-radius: 10px; padding: 8px; position: relative; margin-bottom: 15px; }
         
-        /* 历史表格改为局部滚动 */
         .table-wrapper { flex: 0.8; overflow-y: auto; border-top: 1px solid #30363d; -webkit-overflow-scrolling: touch; }
         table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        th { position: sticky; top: 0; background: var(--card); z-index: 10; padding: 10px; border-bottom: 1px solid #30363d; color: #8b949e; }
+        th { position: sticky; top: 0; background: var(--card); z-index: 10; padding: 10px; border-bottom: 1px solid #30363d; color: #8b949e; text-align: left; }
         td { padding: 10px; border-bottom: 1px solid #21262d; }
         .edit-input { width: 50px; background: transparent; border: none; color: #fff; text-align: center; font-size: 0.8rem; }
 
-        .footer-tools { display: flex; gap: 10px; padding: 10px 0; justify-content: center; flex-shrink: 0; }
-        .btn-tool { border-color: #484f58; color: #8b949e; font-size: 0.7rem; padding: 5px 10px; }
+        .footer-tools { display: flex; gap: 8px; padding: 10px 0; justify-content: center; flex-shrink: 0; }
+        .btn-tool { border-color: #484f58; color: #8b949e; font-size: 0.65rem; padding: 5px 8px; border-radius: 4px; border: 1px solid #484f58; background: transparent; }
     </style>
 </head>
 <body>
@@ -58,7 +63,7 @@
 <div class="dashboard">
     <div class="header">
         <h2 style="margin:0; font-size: 1.2rem;">健康体重运营系统</h2>
-        <small style="color:#58a6ff">Full-Screen Optimized</small>
+        <div class="monitoring-tag">● MONITORING...</div>
     </div>
 
     <div class="stats">
@@ -70,7 +75,7 @@
     <div class="input-area">
         <div class="input-row">
             <input type="date" id="dateIn">
-            <input type="number" id="weightIn" step="0.1" placeholder="体重(斤)">
+            <input type="number" id="weightIn" step="0.1" placeholder="斤">
             <button onclick="save()">发布</button>
         </div>
     </div>
@@ -90,12 +95,12 @@
         <button class="btn-tool" onclick="chart.resetZoom()">重置视图</button>
         <button class="btn-tool" onclick="exportMarkdown()">MD复制</button>
         <button class="btn-tool" onclick="exportCSV()">导出Excel</button>
-        <button class="btn-tool" style="color:var(--red)" onclick="resetAll()">格式化</button>
+        <button class="btn-tool" style="color:var(--red); border-color:#3e0a0a" onclick="resetAll()">格式化</button>
     </div>
 </div>
 
 <script>
-    let dataMap = JSON.parse(localStorage.getItem('health_ops_v2.8')) || {};
+    let dataMap = JSON.parse(localStorage.getItem('health_ops_v2.9')) || {};
     let chart;
 
     window.onload = () => {
@@ -111,14 +116,18 @@
         const targetDate = new Date(dateRaw).toLocaleDateString();
         if(!dataMap[targetDate]) { dataMap[targetDate] = { min: val, max: val }; }
         else { dataMap[targetDate].min = Math.min(dataMap[targetDate].min, val); dataMap[targetDate].max = Math.max(dataMap[targetDate].max, val); }
-        localStorage.setItem('health_ops_v2.8', JSON.stringify(dataMap));
+        localStorage.setItem('health_ops_v2.9', JSON.stringify(dataMap));
         document.getElementById('weightIn').value = '';
         render();
     }
 
     function updateVal(date, type, val) {
         const nVal = parseFloat(val);
-        if(!isNaN(nVal)) { dataMap[date][type] = nVal; localStorage.setItem('health_ops_v2.8', JSON.stringify(dataMap)); render(); }
+        if(!isNaN(nVal)) { 
+            dataMap[date][type] = nVal; 
+            localStorage.setItem('health_ops_v2.9', JSON.stringify(dataMap)); 
+            render(); 
+        }
     }
 
     function render() {
@@ -148,17 +157,34 @@
             options: {
                 responsive: true, maintainAspectRatio: false,
                 scales: { 
-                    y: { suggestedMin: 175, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { font: {size: 10} } },
-                    x: { ticks: { font: {size: 10} } }
+                    y: { suggestedMin: 175, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { font: {size: 10}, color: '#484f58' } },
+                    x: { ticks: { font: {size: 10}, color: '#484f58' } }
                 },
-                plugins: { legend: { display: false }, zoom: { pan: { enabled: true, mode: 'xy' }, zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'xy' } } }
+                plugins: { 
+                    legend: { display: false }, 
+                    zoom: { pan: { enabled: true, mode: 'xy' }, zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'xy' } } 
+                }
             }
         });
     }
 
-    function exportMarkdown() { /* 同前 */ }
-    function exportCSV() { /* 同前 */ }
-    function resetAll() { if(confirm("确定清除？")) { dataMap = {}; localStorage.clear(); render(); } }
+    function exportMarkdown() {
+        const sortedDates = Object.keys(dataMap).sort((a,b) => new Date(a) - new Date(b));
+        let md = "| 日期 | 最低 | 最高 |\n| --- | --- | --- |\n";
+        sortedDates.forEach(d => md += `| ${d} | ${dataMap[d].min} | ${dataMap[d].max} |\n`);
+        const el = document.createElement('textarea'); el.value = md; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
+        alert("Markdown 已复制");
+    }
+
+    function exportCSV() {
+        const sortedDates = Object.keys(dataMap).sort((a,b) => new Date(a) - new Date(b));
+        let csv = "\ufeff日期,最低(斤),最高(斤)\n";
+        sortedDates.forEach(d => csv += `${d},${dataMap[d].min},${dataMap[d].max}\n`);
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `health_ops_data.csv`; link.click();
+    }
+
+    function resetAll() { if(confirm("确定清除所有数据？")) { dataMap = {}; localStorage.clear(); render(); } }
 </script>
 </body>
 </html>
