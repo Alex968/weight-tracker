@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3063/3063600.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2103/2103633.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
@@ -39,58 +39,61 @@
         }
 
         .header { border-left: 4px solid var(--active-green); padding-left: 15px; margin: 20px 0; flex-shrink: 0; }
-        .title { margin: 0; font-size: 1.3rem; font-weight: bold; color: #f0f6fc; }
+        .title { margin: 0; font-size: 1.3rem; font-weight: bold; color: #f0f6fc; letter-spacing: 1px; }
         
         .monitoring-tag { 
             color: var(--active-green); font-size: 0.7rem; font-weight: bold; margin-top: 5px;
-            letter-spacing: 1.5px; animation: breathe 2s infinite; 
+            letter-spacing: 2px; animation: breathe 2.5s infinite; 
         }
-        @keyframes breathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        @keyframes breathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         
         .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; flex-shrink: 0; }
-        .stat-box { background: rgba(255,255,255,0.02); padding: 10px 5px; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
-        .stat-label { font-size: 0.6rem; color: #8b949e; margin-bottom: 4px; }
+        .stat-box { background: rgba(255,255,255,0.02); padding: 12px 5px; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
+        .stat-label { font-size: 0.6rem; color: #8b949e; margin-bottom: 5px; }
         .stat-val { font-size: 1.3rem; font-weight: 800; color: var(--data-blue); }
 
-        .input-area { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px dashed var(--border); flex-shrink: 0; }
+        .input-area { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px dashed var(--border); flex-shrink: 0; }
         .input-row { display: flex; gap: 8px; }
         input { 
             background: #010409; border: 1px solid var(--border); color: #fff; 
-            padding: 12px; border-radius: 8px; outline: none; font-size: 0.95rem; min-width: 0;
+            padding: 12px; border-radius: 8px; outline: none; font-size: 1rem; min-width: 0;
         }
-        input:focus { border-color: var(--active-green); }
+        input:focus { border-color: var(--active-green); box-shadow: 0 0 8px rgba(46, 204, 113, 0.2); }
         #dateIn { flex: 1.2; color: var(--active-green); }
         #weightIn { flex: 1.5; font-weight: bold; }
         
         .pub-btn { 
             background: var(--active-green); color: #000; border: none; 
-            padding: 0 15px; border-radius: 8px; cursor: pointer; font-weight: bold;
+            padding: 0 18px; border-radius: 8px; cursor: pointer; font-weight: bold;
+            transition: all 0.2s;
         }
+        .pub-btn:active { transform: scale(0.92); opacity: 0.8; }
 
         .chart-container { 
-            flex: 1; min-height: 200px; background: rgba(0,0,0,0.1); 
-            border-radius: 12px; padding: 10px; position: relative; margin-bottom: 15px;
+            flex: 1; min-height: 180px; background: rgba(0,0,0,0.15); 
+            border-radius: 16px; padding: 12px; position: relative; margin-bottom: 15px;
             border: 1px solid var(--border);
         }
         
         .table-wrapper { flex: 0.8; overflow-y: auto; border-top: 1px solid var(--border); }
-        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
         th { position: sticky; top: 0; background: var(--card-dark); z-index: 10; padding: 12px 10px; border-bottom: 1px solid var(--border); color: #8b949e; text-align: left; }
         td { padding: 12px 10px; border-bottom: 1px solid #21262d; }
-        .edit-input { width: 55px; background: transparent; border: none; color: #fff; text-align: center; font-size: 0.85rem; }
+        .edit-input { width: 60px; background: transparent; border: none; color: #fff; text-align: center; font-size: 0.9rem; }
 
         .footer-tools { display: flex; gap: 8px; padding: 15px 0 5px 0; justify-content: center; flex-shrink: 0; }
         .btn-tool { 
-            border: 1px solid var(--border); color: #8b949e; font-size: 0.65rem; 
-            padding: 5px 10px; border-radius: 4px; background: transparent;
+            border: 1px solid var(--border); color: #8b949e; font-size: 0.7rem; 
+            padding: 6px 12px; border-radius: 6px; background: transparent;
         }
-        /* 底部版本号 - V1.2 确认点 */
+        
         .version-footer {
-            font-size: 0.65rem; color: #30363d; font-family: monospace;
+            font-size: 0.65rem; color: #30363d; font-family: 'Courier New', Courier, monospace;
             padding-bottom: env(safe-area-inset-bottom);
             margin-bottom: 15px;
             text-align: center;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -99,7 +102,7 @@
 <div class="dashboard">
     <div class="header">
         <div class="title">健康体重运营系统</div>
-        <div class="monitoring-tag">● MONITORING...</div>
+        <div class="monitoring-tag">● SYSTEM ACTIVE</div>
     </div>
 
     <div class="stats">
@@ -111,8 +114,8 @@
     <div class="input-area">
         <div class="input-row">
             <input type="date" id="dateIn">
-            <input type="number" id="weightIn" step="0.1" placeholder="斤">
-            <button class="pub-btn" onclick="save()">发布更新</button>
+            <input type="number" id="weightIn" step="0.1" placeholder="体重/斤">
+            <button class="pub-btn" onclick="save()">录入</button>
         </div>
     </div>
 
@@ -122,24 +125,22 @@
 
     <div class="table-wrapper">
         <table>
-            <thead><tr><th>运营日期</th><th>最低</th><th>最高</th></tr></thead>
+            <thead><tr><th>运营日期</th><th>最低记录</th><th>最高记录</th></tr></thead>
             <tbody id="logList"></tbody>
         </table>
     </div>
 
     <div class="footer-tools">
         <button class="btn-tool" onclick="chart.resetZoom()">重置视图</button>
-        <button class="btn-tool" onclick="exportMarkdown()">MD复制</button>
-        <button class="btn-tool" onclick="exportCSV()">导出</button>
-        <button class="btn-tool" style="color:var(--alert-red)" onclick="resetAll()">初始化</button>
+        <button class="btn-tool" onclick="exportCSV()">数据导出</button>
+        <button class="btn-tool" style="color:var(--alert-red)" onclick="resetAll()">格式化系统</button>
     </div>
     
-    <div class="version-footer">HEALTH OPS SYSTEM V1.2</div>
+    <div class="version-footer">CORE SYSTEM V1.3</div>
 </div>
 
 <script>
-    // 自动兼容旧版本数据
-    let dataMap = JSON.parse(localStorage.getItem('health_ops_v1.1')) || JSON.parse(localStorage.getItem('health_ops_final')) || {};
+    let dataMap = JSON.parse(localStorage.getItem('health_ops_v1.1')) || {};
     let chart;
 
     window.onload = () => {
@@ -190,7 +191,7 @@
                 labels: sortedDates,
                 datasets: [
                     { label: 'Max', data: sortedDates.map(d => dataMap[d].max), borderColor: '#ff4d4d', borderWidth: 1, pointRadius: 1, tension: 0.4 },
-                    { label: 'Min', data: sortedDates.map(d => dataMap[d].min), borderColor: '#2ecc71', borderWidth: 3, fill: true, backgroundColor: 'rgba(46,204,113,0.05)', tension: 0.4, pointBackgroundColor: '#2ecc71' }
+                    { label: 'Min', data: sortedDates.map(d => dataMap[d].min), borderColor: '#2ecc71', borderWidth: 3, fill: true, backgroundColor: 'rgba(46,204,113,0.08)', tension: 0.4, pointBackgroundColor: '#2ecc71' }
                 ]
             },
             options: {
@@ -207,23 +208,15 @@
         });
     }
 
-    function exportMarkdown() {
-        const sortedDates = Object.keys(dataMap).sort((a,b) => new Date(a) - new Date(b));
-        let md = "| 日期 | 最低 | 最高 |\n| --- | --- | --- |\n";
-        sortedDates.forEach(d => md += `| ${d} | ${dataMap[d].min} | ${dataMap[d].max} |\n`);
-        const el = document.createElement('textarea'); el.value = md; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
-        alert("Markdown已复制");
-    }
-
     function exportCSV() {
         const sortedDates = Object.keys(dataMap).sort((a,b) => new Date(a) - new Date(b));
-        let csv = "\ufeff日期,最低(斤),最高(斤)\n";
+        let csv = "\ufeff日期,最低,最高\n";
         sortedDates.forEach(d => csv += `${d},${dataMap[d].min},${dataMap[d].max}\n`);
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `health_ops_v1.2.csv`; link.click();
+        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `health_data_v1.3.csv`; link.click();
     }
 
-    function resetAll() { if(confirm("确定清空数据？")) { dataMap = {}; localStorage.clear(); render(); } }
+    function resetAll() { if(confirm("确定清空所有本地数据？")) { dataMap = {}; localStorage.clear(); render(); } }
 </script>
 </body>
 </html>
