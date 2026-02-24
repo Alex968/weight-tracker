@@ -8,14 +8,13 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/4359/4359863.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3209/3209265.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
     
     <style>
-        /* 定义一套更活泼的霓虹配色 */
         :root { 
             --neon-green: #00ff9d; 
             --neon-blue: #00d4ff; 
@@ -24,22 +23,28 @@
             --border: #232936;
         }
         
-        /* 强制全屏且不滚动，防止录入框跑掉 */
+        /* 核心布局：禁止 body 滚动 */
         html, body { 
             height: 100%; margin: 0; padding: 0; overflow: hidden;
             background: var(--bg); color: #e0e6ed; 
             font-family: -apple-system, "PingFang SC", sans-serif; 
         }
 
+        /* 主容器：设为 Flex 列布局 */
         .dashboard { 
             display: flex; flex-direction: column;
-            height: 100vh; width: 100%; max-width: 500px; margin: 0 auto;
-            box-sizing: border-box;
-            padding: env(safe-area-inset-top) 15px env(safe-area-inset-bottom) 15px;
+            height: 100%; max-width: 500px; margin: 0 auto;
+            background: var(--bg);
         }
 
-        /* 头部和数据看板固定，不缩减 */
-        .header-section { flex-shrink: 0; }
+        /* === 上半部分：固定钉死在顶部 === */
+        .top-fixed-section {
+            flex: 0 0 auto; /* 不许伸缩，高度由内容决定 */
+            padding: env(safe-area-inset-top) 15px 0 15px;
+            background: var(--bg); /* 防止下方内容滚动上来时透视 */
+            z-index: 10;
+            border-bottom: 1px solid var(--border);
+        }
 
         .header { border-left: 3px solid var(--neon-green); padding-left: 12px; margin: 15px 0 10px 0; }
         .title { margin: 0; font-size: 1.1rem; font-weight: 800; color: #fff; }
@@ -49,9 +54,8 @@
         .stat-label { font-size: 0.6rem; color: #788291; margin-bottom: 4px; }
         .stat-val { font-size: 1.1rem; font-weight: 800; color: var(--neon-blue); }
 
-        /* 录入区：强制固定，不被挤出屏幕 */
+        /* 录入区 */
         .input-area { 
-            flex-shrink: 0; 
             background: rgba(0, 255, 157, 0.05); padding: 12px; 
             border-radius: 10px; margin-bottom: 15px; border: 1px solid rgba(0, 255, 157, 0.1); 
         }
@@ -65,33 +69,44 @@
             padding: 0 15px; border-radius: 6px; cursor: pointer; font-weight: bold; 
         }
 
-        /* 中间内容区：可伸缩 */
+        /* === 下半部分：内部滚动区 === */
+        .bottom-scroll-section {
+            flex: 1 1 auto; /* 占据剩余所有空间 */
+            overflow-y: auto; /* 开启内部滚动 */
+            -webkit-overflow-scrolling: touch; /* iOS顺滑滚动 */
+            padding: 15px 15px env(safe-area-inset-bottom) 15px;
+        }
+
         .chart-container { 
-            flex: 1.5; min-height: 150px; background: rgba(0,0,0,0.2); 
-            border-radius: 12px; padding: 10px; margin-bottom: 10px;
+            min-height: 200px; /* 固定高度 */
+            background: rgba(0,0,0,0.2); 
+            border-radius: 12px; padding: 10px; margin-bottom: 15px;
             border: 1px solid var(--border); position: relative;
         }
         
-        .table-wrapper { 
-            flex: 1; overflow-y: auto; border-top: 1px solid var(--border);
-            -webkit-overflow-scrolling: touch;
-        }
+        /* 表格不再需要单独的 wrapper 滚动，因为它在 bottom-scroll-section 里 */
+        .table-container { border-top: 1px solid var(--border); }
         
         table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        th { position: sticky; top: 0; background: var(--panel); padding: 8px; border-bottom: 1px solid var(--border); color: #788291; text-align: left; }
+        th { 
+            position: sticky; top: 0; /* 表头吸顶 */
+            background: var(--panel); padding: 8px; 
+            border-bottom: 1px solid var(--border); color: #788291; text-align: left; 
+            z-index: 5;
+        }
         td { padding: 8px; border-bottom: 1px solid #1a1e26; }
         .edit-input { width: 50px; background: transparent; border: none; color: var(--neon-blue); text-align: center; font-weight: bold; }
 
-        .footer-tools { flex-shrink: 0; display: flex; gap: 8px; padding: 10px 0; justify-content: center; }
+        .footer-tools { display: flex; gap: 8px; padding: 15px 0 10px 0; justify-content: center; }
         .btn-tool { border: 1px solid var(--border); color: #788291; font-size: 0.65rem; padding: 4px 8px; border-radius: 4px; background: transparent; }
         
-        .version-footer { flex-shrink: 0; font-size: 0.6rem; color: #232936; text-align: center; padding-bottom: 5px; letter-spacing: 1px; }
+        .version-footer { font-size: 0.6rem; color: #232936; text-align: center; padding-bottom: 5px; letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
 <div class="dashboard">
-    <div class="header-section">
+    <div class="top-fixed-section">
         <div class="header">
             <div class="title">健康体重运营系统</div>
         </div>
@@ -100,38 +115,40 @@
             <div class="stat-box"><div class="stat-label">当前记录</div><div id="curMin" class="stat-val">---</div></div>
             <div class="stat-box"><div class="stat-label">运营目标</div><div class="stat-val" style="color:var(--neon-green)">180</div></div>
         </div>
-    </div>
-
-    <div class="input-area">
-        <div class="input-row">
-            <input type="date" id="dateIn">
-            <input type="number" id="weightIn" step="0.1" placeholder="斤">
-            <button class="pub-btn" onclick="save()">发布</button>
+        <div class="input-area">
+            <div class="input-row">
+                <input type="date" id="dateIn">
+                <input type="number" id="weightIn" step="0.1" placeholder="体重(斤)">
+                <button class="pub-btn" onclick="save()">发布</button>
+            </div>
         </div>
     </div>
 
-    <div class="chart-container">
-        <canvas id="myChart"></canvas>
-    </div>
+    <div class="bottom-scroll-section">
+        <div class="chart-container">
+            <canvas id="myChart"></canvas>
+        </div>
 
-    <div class="table-wrapper">
-        <table>
-            <thead><tr><th>运营日期</th><th>最低</th><th>最高</th></tr></thead>
-            <tbody id="logList"></tbody>
-        </table>
-    </div>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>运营日期</th><th>最低</th><th>最高</th></tr></thead>
+                <tbody id="logList"></tbody>
+            </table>
+        </div>
 
-    <div class="footer-tools">
-        <button class="btn-tool" onclick="chart.resetZoom()">重置视图</button>
-        <button class="btn-tool" onclick="exportCSV()">导出</button>
-        <button class="btn-tool" style="color:var(--neon-blue)" onclick="resetAll()">清空</button>
+        <div class="footer-tools">
+            <button class="btn-tool" onclick="chart.resetZoom()">重置视图</button>
+            <button class="btn-tool" onclick="exportCSV()">导出</button>
+            <button class="btn-tool" style="color:var(--neon-blue)" onclick="resetAll()">清空</button>
+        </div>
+        
+        <div class="version-footer">SYSTEM_V1.3_NOTEBOOK_EDITION</div>
     </div>
-    
-    <div class="version-footer">CORE_KERNEL_UPDATE_V1.2_COLOR</div>
 </div>
 
 <script>
-    let dataMap = JSON.parse(localStorage.getItem('health_ops_v1.1')) || {};
+    // 更新了存储键名到 V1.3，保证环境干净
+    let dataMap = JSON.parse(localStorage.getItem('health_ops_v1.3')) || {};
     let chart;
 
     window.onload = () => {
@@ -152,7 +169,7 @@
             dataMap[targetDate].min = Math.min(dataMap[targetDate].min, val); 
             dataMap[targetDate].max = Math.max(dataMap[targetDate].max, val); 
         }
-        localStorage.setItem('health_ops_v1.1', JSON.stringify(dataMap));
+        localStorage.setItem('health_ops_v1.3', JSON.stringify(dataMap));
         document.getElementById('weightIn').value = '';
         render();
     }
@@ -161,7 +178,7 @@
         const nVal = parseFloat(val);
         if(!isNaN(nVal) && nVal > 0) { 
             dataMap[date][type] = nVal; 
-            localStorage.setItem('health_ops_v1.1', JSON.stringify(dataMap)); 
+            localStorage.setItem('health_ops_v1.3', JSON.stringify(dataMap)); 
             render(); 
         }
     }
@@ -170,7 +187,6 @@
         const body = document.getElementById('logList');
         const sortedDates = Object.keys(dataMap).sort((a,b) => new Date(a) - new Date(b));
         
-        // 自动识别最高体重
         let globalMax = 0;
         sortedDates.forEach(d => { if(dataMap[d].max > globalMax) globalMax = dataMap[d].max; });
         
@@ -204,7 +220,7 @@
                 scales: { 
                     y: { 
                         min: 0, 
-                        beginAtZero: true, // 强制从0开始，消除负数空间
+                        beginAtZero: true, 
                         grid: { color: 'rgba(255,255,255,0.03)' }, 
                         ticks: { color: '#4a5568', font: { size: 10 } } 
                     },
@@ -220,10 +236,10 @@
         let csv = "\ufeff日期,最低,最高\n";
         sortedDates.forEach(d => csv += `${d},${dataMap[d].min},${dataMap[d].max}\n`);
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `健康报表.csv`; link.click();
+        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `健康报表_v1.3.csv`; link.click();
     }
 
-    function resetAll() { if(confirm("确定清空数据？")) { dataMap = {}; localStorage.clear(); render(); } }
+    function resetAll() { if(confirm("确定清空V1.3数据？")) { dataMap = {}; localStorage.clear(); render(); } }
 </script>
 </body>
 </html>
