@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3043/3043208.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2548/2548530.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
@@ -16,7 +16,7 @@
     
     <style>
         :root { 
-            --active-green: #2ecc71; /* 更加饱满的健身绿 */
+            --active-green: #2ecc71; 
             --data-blue: #00d4ff; 
             --alert-red: #ff4d4d; 
             --bg-dark: #0d1117; 
@@ -95,16 +95,16 @@
     </div>
 
     <div class="stats">
-        <div class="stat-box"><div class="stat-label">初始</div><div class="stat-val">280</div></div>
-        <div class="stat-box"><div class="stat-label">当前</div><div id="curMin" class="stat-val">---</div></div>
-        <div class="stat-box"><div class="stat-label">目标</div><div class="stat-val" style="color:var(--active-green)">180</div></div>
+        <div class="stat-box"><div class="stat-label">初始重量</div><div class="stat-val">280</div></div>
+        <div class="stat-box"><div class="stat-label">当前记录</div><div id="curMin" class="stat-val">---</div></div>
+        <div class="stat-box"><div class="stat-label">运营目标</div><div class="stat-val" style="color:var(--active-green)">180</div></div>
     </div>
 
     <div class="input-area">
         <div class="input-row">
             <input type="date" id="dateIn">
-            <input type="number" id="weightIn" step="0.1" placeholder="斤">
-            <button class="pub-btn" onclick="save()">发布</button>
+            <input type="number" id="weightIn" step="0.1" placeholder="体重/斤">
+            <button class="pub-btn" onclick="save()">发布更新</button>
         </div>
     </div>
 
@@ -114,16 +114,16 @@
 
     <div class="table-wrapper">
         <table>
-            <thead><tr><th>运营日期</th><th>最低</th><th>最高</th></tr></thead>
+            <thead><tr><th>运营日期</th><th>最低记录</th><th>最高记录</th></tr></thead>
             <tbody id="logList"></tbody>
         </table>
     </div>
 
     <div class="footer-tools">
         <button class="btn-tool" onclick="chart.resetZoom()">重置视图</button>
-        <button class="btn-tool" onclick="exportMarkdown()">MD复制</button>
-        <button class="btn-tool" onclick="exportCSV()">导出Excel</button>
-        <button class="btn-tool" style="color:var(--alert-red)" onclick="resetAll()">格式化</button>
+        <button class="btn-tool" onclick="exportMarkdown()">MD导出</button>
+        <button class="btn-tool" onclick="exportCSV()">Excel导出</button>
+        <button class="btn-tool" style="color:var(--alert-red)" onclick="resetAll()">系统初始化</button>
     </div>
 </div>
 
@@ -201,7 +201,7 @@
         let md = "| 日期 | 最低 | 最高 |\n| --- | --- | --- |\n";
         sortedDates.forEach(d => md += `| ${d} | ${dataMap[d].min} | ${dataMap[d].max} |\n`);
         const el = document.createElement('textarea'); el.value = md; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
-        alert("Markdown已复制");
+        alert("Markdown表格已复制");
     }
 
     function exportCSV() {
@@ -212,7 +212,7 @@
         const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `health_ops_data.csv`; link.click();
     }
 
-    function resetAll() { if(confirm("确定清空数据？")) { dataMap = {}; localStorage.clear(); render(); } }
+    function resetAll() { if(confirm("确定执行初始化？数据将不可找回。")) { dataMap = {}; localStorage.clear(); render(); } }
 </script>
 </body>
 </html>
