@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2548/2548537.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3063/3063600.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
@@ -40,9 +40,21 @@
 
         .header { border-left: 4px solid var(--active-green); padding-left: 15px; margin: 20px 0; flex-shrink: 0; }
         .title { margin: 0; font-size: 1.3rem; font-weight: bold; color: #f0f6fc; }
+        
+        /* 状态行布局：监测中 + 版本号 */
+        .status-row { 
+            display: flex; 
+            justify-content: flex-start; 
+            align-items: center; 
+            gap: 15px;
+            margin-top: 5px;
+        }
         .monitoring-tag { 
-            color: var(--active-green); font-size: 0.7rem; font-weight: bold; margin-top: 4px;
-            letter-spacing: 1.5px; animation: breathe 2s infinite; 
+            color: var(--active-green); font-size: 0.7rem; font-weight: bold;
+            letter-spacing: 1px; animation: breathe 2s infinite; 
+        }
+        .version-tag {
+            color: #484f58; font-size: 0.7rem; font-family: monospace; font-weight: bold;
         }
         @keyframes breathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
         
@@ -91,7 +103,10 @@
 <div class="dashboard">
     <div class="header">
         <div class="title">健康体重运营系统</div>
-        <div class="monitoring-tag">● MONITORING...</div>
+        <div class="status-row">
+            <div class="monitoring-tag">● MONITORING...</div>
+            <div class="version-tag">V1.1</div>
+        </div>
     </div>
 
     <div class="stats">
@@ -128,7 +143,7 @@
 </div>
 
 <script>
-    let dataMap = JSON.parse(localStorage.getItem('health_ops_final')) || {};
+    let dataMap = JSON.parse(localStorage.getItem('health_ops_v1.1')) || {};
     let chart;
 
     window.onload = () => {
@@ -144,7 +159,7 @@
         const targetDate = new Date(dateRaw).toLocaleDateString('zh-CN');
         if(!dataMap[targetDate]) { dataMap[targetDate] = { min: val, max: val }; }
         else { dataMap[targetDate].min = Math.min(dataMap[targetDate].min, val); dataMap[targetDate].max = Math.max(dataMap[targetDate].max, val); }
-        localStorage.setItem('health_ops_final', JSON.stringify(dataMap));
+        localStorage.setItem('health_ops_v1.1', JSON.stringify(dataMap));
         document.getElementById('weightIn').value = '';
         render();
     }
@@ -153,7 +168,7 @@
         const nVal = parseFloat(val);
         if(!isNaN(nVal)) { 
             dataMap[date][type] = nVal; 
-            localStorage.setItem('health_ops_final', JSON.stringify(dataMap)); 
+            localStorage.setItem('health_ops_v1.1', JSON.stringify(dataMap)); 
             render(); 
         }
     }
