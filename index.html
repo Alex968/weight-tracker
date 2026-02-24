@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2621/2621123.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2092/2092063.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
@@ -16,80 +16,76 @@
     
     <style>
         :root { 
-            --active-green: #00ff9d; 
-            --data-blue: #00d4ff; 
-            --alert-red: #ff4d4d; 
-            --bg-dark: #0a0c10; 
-            --card-dark: #12151a;
-            --border: #1f242c;
+            --neon-green: #00ff9d; 
+            --neon-blue: #00d4ff; 
+            --danger: #ff4d4d; 
+            --bg: #05070a; 
+            --panel: #11141b;
+            --border: #232936;
         }
         
         body { 
-            background: var(--bg-dark); color: #c9d1d9; 
-            font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; 
+            background: var(--bg); color: #e0e6ed; 
+            font-family: -apple-system, "PingFang SC", sans-serif; 
             margin: 0; padding: 0; height: 100vh; overflow: hidden;
             display: flex; flex-direction: column; align-items: center;
         }
 
         .dashboard { 
-            width: 100%; max-width: 600px; height: 100%;
-            background: var(--card-dark); display: flex; flex-direction: column;
+            width: 100%; max-width: 500px; height: 100%;
+            background: var(--panel); display: flex; flex-direction: column;
             padding: env(safe-area-inset-top) 20px 0 20px;
             box-sizing: border-box;
+            border-left: 1px solid var(--border); border-right: 1px solid var(--border);
         }
 
-        .header { border-left: 4px solid var(--active-green); padding-left: 15px; margin: 20px 0; flex-shrink: 0; }
-        .title { margin: 0; font-size: 1.3rem; font-weight: bold; color: #fff; letter-spacing: 1px; }
+        .header { border-left: 3px solid var(--neon-green); padding-left: 12px; margin: 20px 0; flex-shrink: 0; }
+        .title { margin: 0; font-size: 1.2rem; font-weight: 800; letter-spacing: 1px; color: #fff; }
+        .tag { color: var(--neon-green); font-size: 0.65rem; font-family: monospace; letter-spacing: 2px; }
         
-        .monitoring-tag { 
-            color: var(--active-green); font-size: 0.7rem; font-weight: bold; margin-top: 5px;
-            letter-spacing: 1.5px; opacity: 0.8;
-        }
-        
-        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; flex-shrink: 0; }
-        .stat-box { background: rgba(255,255,255,0.03); padding: 12px 5px; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
-        .stat-label { font-size: 0.65rem; color: #8b949e; margin-bottom: 5px; }
-        .stat-val { font-size: 1.3rem; font-weight: 800; color: var(--data-blue); }
+        /* 数据看板 */
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .stat-box { background: rgba(255,255,255,0.02); padding: 12px 5px; border-radius: 8px; text-align: center; border: 1px solid var(--border); }
+        .stat-label { font-size: 0.6rem; color: #788291; margin-bottom: 4px; }
+        .stat-val { font-size: 1.2rem; font-weight: 800; color: var(--neon-blue); font-family: 'DIN Condensed', sans-serif; }
 
-        .input-area { background: rgba(0,255,157,0.05); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid rgba(0,255,157,0.1); flex-shrink: 0; }
+        /* 输入区 */
+        .input-area { background: rgba(0, 255, 157, 0.03); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(0, 255, 157, 0.1); }
         .input-row { display: flex; gap: 8px; }
         input { 
-            background: #010409; border: 1px solid var(--border); color: #fff; 
-            padding: 12px; border-radius: 8px; outline: none; font-size: 1rem; min-width: 0;
+            background: #000; border: 1px solid var(--border); color: #fff; 
+            padding: 12px; border-radius: 6px; outline: none; font-size: 0.9rem; flex: 1;
         }
-        input:focus { border-color: var(--active-green); }
-        #dateIn { flex: 1.2; color: var(--active-green); }
-        #weightIn { flex: 1.5; font-weight: bold; }
-        
+        input:focus { border-color: var(--neon-green); }
         .pub-btn { 
-            background: var(--active-green); color: #000; border: none; 
-            padding: 0 15px; border-radius: 8px; cursor: pointer; font-weight: bold;
+            background: var(--neon-green); color: #000; border: none; 
+            padding: 0 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9rem;
         }
 
+        /* 图表区 */
         .chart-container { 
-            flex: 1; min-height: 200px; background: rgba(0,0,0,0.2); 
-            border-radius: 16px; padding: 10px; position: relative; margin-bottom: 15px;
+            flex: 1.2; min-height: 180px; background: rgba(0,0,0,0.2); 
+            border-radius: 12px; padding: 10px; position: relative; margin-bottom: 15px;
             border: 1px solid var(--border);
         }
         
+        /* 表格区 */
         .table-wrapper { flex: 0.8; overflow-y: auto; border-top: 1px solid var(--border); }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        th { position: sticky; top: 0; background: var(--card-dark); z-index: 10; padding: 12px 10px; border-bottom: 1px solid var(--border); color: #8b949e; text-align: left; }
-        td { padding: 12px 10px; border-bottom: 1px solid #1a1e23; }
-        .edit-input { width: 60px; background: transparent; border: none; color: #fff; text-align: center; font-size: 0.9rem; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        th { position: sticky; top: 0; background: var(--panel); padding: 10px; border-bottom: 1px solid var(--border); color: #788291; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #1a1e26; }
+        .edit-input { width: 50px; background: transparent; border: none; color: var(--neon-blue); text-align: center; font-weight: bold; }
 
-        .footer-tools { display: flex; gap: 8px; padding: 15px 0 5px 0; justify-content: center; flex-shrink: 0; }
+        .footer-tools { display: flex; gap: 8px; padding: 10px 0; justify-content: center; }
         .btn-tool { 
-            border: 1px solid var(--border); color: #8b949e; font-size: 0.7rem; 
-            padding: 6px 12px; border-radius: 6px; background: transparent;
+            border: 1px solid var(--border); color: #788291; font-size: 0.65rem; 
+            padding: 4px 10px; border-radius: 4px; background: transparent;
         }
         
         .version-footer {
-            font-size: 0.65rem; color: #30363d; font-family: monospace;
+            font-size: 0.6rem; color: #232936; font-family: monospace;
             padding-bottom: env(safe-area-inset-bottom);
-            margin-bottom: 15px;
-            text-align: center;
-            letter-spacing: 1px;
+            margin-bottom: 10px; text-align: center; letter-spacing: 2px;
         }
     </style>
 </head>
@@ -98,29 +94,20 @@
 <div class="dashboard">
     <div class="header">
         <div class="title">健康体重运营系统</div>
-        <div class="monitoring-tag">● 实时监测已开启</div>
+        <div class="tag">OPERATIONAL MONITORING V1.2</div>
     </div>
 
     <div class="stats">
-        <div class="stat-box">
-            <div class="stat-label">初始最高</div>
-            <div id="maxWeight" class="stat-val">---</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-label">当前记录</div>
-            <div id="curMin" class="stat-val">---</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-label">运营目标</div>
-            <div class="stat-val" style="color:var(--active-green)">180</div>
-        </div>
+        <div class="stat-box"><div class="stat-label">初始最高</div><div id="maxWeight" class="stat-val">---</div></div>
+        <div class="stat-box"><div class="stat-label">当前记录</div><div id="curMin" class="stat-val">---</div></div>
+        <div class="stat-box"><div class="stat-label">运营目标</div><div class="stat-val" style="color:var(--neon-green)">180</div></div>
     </div>
 
     <div class="input-area">
         <div class="input-row">
             <input type="date" id="dateIn">
-            <input type="number" id="weightIn" step="0.1" placeholder="体重/斤">
-            <button class="pub-btn" onclick="save()">发布</button>
+            <input type="number" id="weightIn" step="0.1" placeholder="当前体重(斤)">
+            <button class="pub-btn" onclick="save()">录入</button>
         </div>
     </div>
 
@@ -136,15 +123,16 @@
     </div>
 
     <div class="footer-tools">
-        <button class="btn-tool" onclick="chart.resetZoom()">重置视图</button>
-        <button class="btn-tool" onclick="exportCSV()">导出数据</button>
-        <button class="btn-tool" style="color:var(--alert-red)" onclick="resetAll()">清空系统</button>
+        <button class="btn-tool" onclick="chart.resetZoom()">重置缩放</button>
+        <button class="btn-tool" onclick="exportCSV()">导出报表</button>
+        <button class="btn-tool" style="color:var(--danger)" onclick="resetAll()">格式化数据</button>
     </div>
     
-    <div class="version-footer">OPERATING SYSTEM V1.2</div>
+    <div class="version-footer">CORE_KERNEL_UPDATE_V1.2</div>
 </div>
 
 <script>
+    // 自动兼容之前的存储键名
     let dataMap = JSON.parse(localStorage.getItem('health_ops_v1.1')) || {};
     let chart;
 
@@ -157,10 +145,12 @@
     function save() {
         const val = parseFloat(document.getElementById('weightIn').value);
         const dateRaw = document.getElementById('dateIn').value;
-        if(!val || val <= 0 || !dateRaw) return;
+        if(!val || val <= 0 || !dateRaw) return; 
+        
         const targetDate = new Date(dateRaw).toLocaleDateString('zh-CN');
-        if(!dataMap[targetDate]) { dataMap[targetDate] = { min: val, max: val }; }
-        else { 
+        if(!dataMap[targetDate]) { 
+            dataMap[targetDate] = { min: val, max: val }; 
+        } else { 
             dataMap[targetDate].min = Math.min(dataMap[targetDate].min, val); 
             dataMap[targetDate].max = Math.max(dataMap[targetDate].max, val); 
         }
@@ -180,65 +170,88 @@
 
     function render() {
         const body = document.getElementById('logList');
-        const dates = Object.keys(dataMap).sort((a,b) => new Date(a) - new Date(b));
+        const sortedDates = Object.keys(dataMap).sort((a,b) => new Date(a) - new Date(b));
         
-        // 计算全局最高和最新最低
+        // 核心逻辑：自动识别全局最高
         let globalMax = 0;
-        dates.forEach(d => { if(dataMap[d].max > globalMax) globalMax = dataMap[d].max; });
+        sortedDates.forEach(d => {
+            if(dataMap[d].max > globalMax) globalMax = dataMap[d].max;
+        });
         
         body.innerHTML = '';
-        [...dates].reverse().forEach(d => {
+        [...sortedDates].reverse().forEach(d => {
             body.innerHTML += `<tr>
-                <td style="color:#8b949e">${d}</td>
+                <td style="color:#788291">${d}</td>
                 <td><input class="edit-input" type="number" step="0.1" value="${dataMap[d].min}" onchange="updateVal('${d}','min',this.value)"></td>
                 <td><input class="edit-input" type="number" step="0.1" value="${dataMap[d].max}" onchange="updateVal('${d}','max',this.value)"></td>
             </tr>`;
         });
 
-        // 更新看板数据
-        document.getElementById('maxWeight').innerText = globalMax || '---';
-        if(dates.length > 0) {
-            document.getElementById('curMin').innerText = dataMap[dates[dates.length-1]].min;
+        document.getElementById('maxWeight').innerText = globalMax > 0 ? globalMax : '待录入';
+        if(sortedDates.length > 0) {
+            document.getElementById('curMin').innerText = dataMap[sortedDates[sortedDates.length-1]].min;
         }
 
         const ctx = document.getElementById('myChart').getContext('2d');
         if(chart) chart.destroy();
+        
         chart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: dates,
+                labels: sortedDates,
                 datasets: [
-                    { label: '最高', data: dates.map(d => dataMap[d].max), borderColor: '#ff4d4d', borderWidth: 1, pointRadius: 1, tension: 0.4 },
-                    { label: '最低', data: dates.map(d => dataMap[d].min), borderColor: '#00ff9d', borderWidth: 3, fill: true, backgroundColor: 'rgba(0,255,157,0.05)', tension: 0.4, pointBackgroundColor: '#00ff9d' }
+                    { 
+                        label: '最高', 
+                        data: sortedDates.map(d => dataMap[d].max), 
+                        borderColor: 'rgba(255, 77, 77, 0.5)', 
+                        borderWidth: 1, 
+                        pointRadius: 0, 
+                        tension: 0.4 
+                    },
+                    { 
+                        label: '最低', 
+                        data: sortedDates.map(d => dataMap[d].min), 
+                        borderColor: '#00ff9d', 
+                        borderWidth: 3, 
+                        fill: true, 
+                        backgroundColor: 'rgba(0, 255, 157, 0.05)', 
+                        tension: 0.4,
+                        pointBackgroundColor: '#00ff9d'
+                    }
                 ]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 scales: { 
                     y: { 
-                        min: 0, // 严禁负数
-                        grid: { color: 'rgba(255,255,255,0.05)' }, 
-                        ticks: { color: '#484f58', font: {size: 10} } 
+                        min: 0, // 关键：锁定最小值，不显示负数
+                        beginAtZero: false, // 避免 0 刻度过于突兀
+                        grid: { color: 'rgba(255,255,255,0.03)' }, 
+                        ticks: { 
+                            color: '#4a5568', 
+                            font: { size: 10 },
+                            callback: (val) => val >= 0 ? val : null // 双重保险：过滤负数刻度
+                        } 
                     },
-                    x: { ticks: { color: '#484f58', font: {size: 10} } }
+                    x: { ticks: { color: '#4a5568', font: { size: 10 } } }
                 },
                 plugins: { 
                     legend: { display: false }, 
-                    zoom: { pan: { enabled: true, mode: 'xy' }, zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'xy' } } 
+                    zoom: { pan: { enabled: true, mode: 'x' }, zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' } } 
                 }
             }
         });
     }
 
     function exportCSV() {
-        const dates = Object.keys(dataMap).sort((a,b) => new Date(a) - new Date(b));
-        let csv = "\ufeff日期,最低,最高\n";
-        dates.forEach(d => csv += `${d},${dataMap[d].min},${dataMap[d].max}\n`);
+        const sortedDates = Object.keys(dataMap).sort((a,b) => new Date(a) - new Date(b));
+        let csv = "\ufeff日期,最低记录,最高记录\n";
+        sortedDates.forEach(d => csv += `${d},${dataMap[d].min},${dataMap[d].max}\n`);
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `健康数据_v1.2.csv`; link.click();
+        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `健康体重报表_V1.2.csv`; link.click();
     }
 
-    function resetAll() { if(confirm("确定清空所有数据？")) { dataMap = {}; localStorage.clear(); render(); } }
+    function resetAll() { if(confirm("警告：将永久清除所有运营数据，是否继续？")) { dataMap = {}; localStorage.clear(); render(); } }
 </script>
 </body>
 </html>
