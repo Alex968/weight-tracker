@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3209/3209265.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3706/3706214.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
@@ -23,84 +23,87 @@
             --border: #232936;
         }
         
-        /* 核心布局：禁止 body 滚动 */
         html, body { 
             height: 100%; margin: 0; padding: 0; overflow: hidden;
             background: var(--bg); color: #e0e6ed; 
             font-family: -apple-system, "PingFang SC", sans-serif; 
         }
 
-        /* 主容器：设为 Flex 列布局 */
         .dashboard { 
             display: flex; flex-direction: column;
             height: 100%; max-width: 500px; margin: 0 auto;
             background: var(--bg);
         }
 
-        /* === 上半部分：固定钉死在顶部 === */
+        /* 上半部分：固定区 */
         .top-fixed-section {
-            flex: 0 0 auto; /* 不许伸缩，高度由内容决定 */
+            flex-shrink: 0;
             padding: env(safe-area-inset-top) 15px 0 15px;
-            background: var(--bg); /* 防止下方内容滚动上来时透视 */
+            background: var(--bg);
             z-index: 10;
-            border-bottom: 1px solid var(--border);
         }
 
         .header { border-left: 3px solid var(--neon-green); padding-left: 12px; margin: 15px 0 10px 0; }
         .title { margin: 0; font-size: 1.1rem; font-weight: 800; color: #fff; }
         
-        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
         .stat-box { background: rgba(255,255,255,0.02); padding: 10px 5px; border-radius: 8px; text-align: center; border: 1px solid var(--border); }
         .stat-label { font-size: 0.6rem; color: #788291; margin-bottom: 4px; }
         .stat-val { font-size: 1.1rem; font-weight: 800; color: var(--neon-blue); }
 
-        /* 录入区 */
+        /* 录入区：布局加固修复 */
         .input-area { 
             background: rgba(0, 255, 157, 0.05); padding: 12px; 
-            border-radius: 10px; margin-bottom: 15px; border: 1px solid rgba(0, 255, 157, 0.1); 
+            border-radius: 10px; margin-bottom: 10px; border: 1px solid rgba(0, 255, 157, 0.1); 
         }
-        .input-row { display: flex; gap: 8px; }
+        .input-row { 
+            display: flex; 
+            gap: 6px; 
+            align-items: center; 
+            justify-content: space-between;
+        }
+        
+        /* 调整输入框比例，确保按钮有空间 */
+        #dateIn { flex: 1.4; min-width: 0; }
+        #weightIn { flex: 1; min-width: 0; }
+        
         input { 
             background: #000; border: 1px solid var(--border); color: #fff; 
-            padding: 10px; border-radius: 6px; outline: none; font-size: 0.9rem; flex: 1;
+            padding: 10px 5px; border-radius: 6px; outline: none; font-size: 0.85rem;
         }
+        
         .pub-btn { 
+            flex: 0 0 60px; /* 强制按钮宽度为60像素，不许收缩 */
             background: var(--neon-green); color: #000; border: none; 
-            padding: 0 15px; border-radius: 6px; cursor: pointer; font-weight: bold; 
+            height: 38px; border-radius: 6px; cursor: pointer; 
+            font-weight: bold; font-size: 0.85rem;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        /* === 下半部分：内部滚动区 === */
+        /* 下半部分：滚动区 */
         .bottom-scroll-section {
-            flex: 1 1 auto; /* 占据剩余所有空间 */
-            overflow-y: auto; /* 开启内部滚动 */
-            -webkit-overflow-scrolling: touch; /* iOS顺滑滚动 */
-            padding: 15px 15px env(safe-area-inset-bottom) 15px;
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 10px 15px env(safe-area-inset-bottom) 15px;
         }
 
         .chart-container { 
-            min-height: 200px; /* 固定高度 */
+            height: 180px; 
             background: rgba(0,0,0,0.2); 
             border-radius: 12px; padding: 10px; margin-bottom: 15px;
             border: 1px solid var(--border); position: relative;
         }
         
-        /* 表格不再需要单独的 wrapper 滚动，因为它在 bottom-scroll-section 里 */
-        .table-container { border-top: 1px solid var(--border); }
-        
         table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        th { 
-            position: sticky; top: 0; /* 表头吸顶 */
-            background: var(--panel); padding: 8px; 
-            border-bottom: 1px solid var(--border); color: #788291; text-align: left; 
-            z-index: 5;
-        }
-        td { padding: 8px; border-bottom: 1px solid #1a1e26; }
+        th { position: sticky; top: 0; background: var(--panel); padding: 8px; border-bottom: 1px solid var(--border); color: #788291; text-align: left; }
+        td { padding: 10px 8px; border-bottom: 1px solid #1a1e26; }
         .edit-input { width: 50px; background: transparent; border: none; color: var(--neon-blue); text-align: center; font-weight: bold; }
 
-        .footer-tools { display: flex; gap: 8px; padding: 15px 0 10px 0; justify-content: center; }
+        .footer-tools { display: flex; gap: 8px; padding: 20px 0; justify-content: center; }
         .btn-tool { border: 1px solid var(--border); color: #788291; font-size: 0.65rem; padding: 4px 8px; border-radius: 4px; background: transparent; }
         
-        .version-footer { font-size: 0.6rem; color: #232936; text-align: center; padding-bottom: 5px; letter-spacing: 1px; }
+        .version-footer { font-size: 0.6rem; color: #232936; text-align: center; padding-bottom: 10px; letter-spacing: 1px; }
     </style>
 </head>
 <body>
@@ -118,7 +121,7 @@
         <div class="input-area">
             <div class="input-row">
                 <input type="date" id="dateIn">
-                <input type="number" id="weightIn" step="0.1" placeholder="体重(斤)">
+                <input type="number" id="weightIn" step="0.1" placeholder="体重/斤">
                 <button class="pub-btn" onclick="save()">发布</button>
             </div>
         </div>
@@ -129,12 +132,10 @@
             <canvas id="myChart"></canvas>
         </div>
 
-        <div class="table-container">
-            <table>
-                <thead><tr><th>运营日期</th><th>最低</th><th>最高</th></tr></thead>
-                <tbody id="logList"></tbody>
-            </table>
-        </div>
+        <table>
+            <thead><tr><th>运营日期</th><th>最低</th><th>最高</th></tr></thead>
+            <tbody id="logList"></tbody>
+        </table>
 
         <div class="footer-tools">
             <button class="btn-tool" onclick="chart.resetZoom()">重置视图</button>
@@ -142,12 +143,11 @@
             <button class="btn-tool" style="color:var(--neon-blue)" onclick="resetAll()">清空</button>
         </div>
         
-        <div class="version-footer">SYSTEM_V1.3_NOTEBOOK_EDITION</div>
+        <div class="version-footer">SYSTEM_V1.3_FINAL_NOTEBOOK</div>
     </div>
 </div>
 
 <script>
-    // 更新了存储键名到 V1.3，保证环境干净
     let dataMap = JSON.parse(localStorage.getItem('health_ops_v1.3')) || {};
     let chart;
 
@@ -206,7 +206,6 @@
 
         const ctx = document.getElementById('myChart').getContext('2d');
         if(chart) chart.destroy();
-        
         chart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -218,12 +217,7 @@
             options: {
                 responsive: true, maintainAspectRatio: false,
                 scales: { 
-                    y: { 
-                        min: 0, 
-                        beginAtZero: true, 
-                        grid: { color: 'rgba(255,255,255,0.03)' }, 
-                        ticks: { color: '#4a5568', font: { size: 10 } } 
-                    },
+                    y: { min: 0, beginAtZero: true, grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#4a5568', font: { size: 10 } } },
                     x: { ticks: { color: '#4a5568', font: { size: 10 } } }
                 },
                 plugins: { legend: { display: false } }
@@ -236,10 +230,10 @@
         let csv = "\ufeff日期,最低,最高\n";
         sortedDates.forEach(d => csv += `${d},${dataMap[d].min},${dataMap[d].max}\n`);
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `健康报表_v1.3.csv`; link.click();
+        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `健康报表.csv`; link.click();
     }
 
-    function resetAll() { if(confirm("确定清空V1.3数据？")) { dataMap = {}; localStorage.clear(); render(); } }
+    function resetAll() { if(confirm("确定清空数据？")) { dataMap = {}; localStorage.clear(); render(); } }
 </script>
 </body>
 </html>
