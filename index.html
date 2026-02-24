@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>系统重构监控</title>
+    <title>健康体重运营系统</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
@@ -34,21 +34,21 @@
 <div class="dashboard">
     <div class="header">
         <div>
-            <h2 style="margin:0; letter-spacing: 1px;">系统重构监控中心</h2>
-            <small style="color:#58a6ff">状态: 运行中...</small>
+            <h2 style="margin:0; letter-spacing: 1px;">健康体重运营系统</h2>
+            <small style="color:#58a6ff">Status: Running Optimized...</small>
         </div>
         <button class="btn-tool" onclick="chart.resetZoom()">重置视图</button>
     </div>
 
     <div class="stats">
-        <div class="stat-box"><div style="font-size:0.7rem; color:#8b949e">初始重量</div><div class="stat-val">280</div></div>
-        <div class="stat-box"><div style="font-size:0.7rem; color:#8b949e">今日最低</div><div id="curMin" class="stat-val">---</div></div>
-        <div class="stat-box"><div style="font-size:0.7rem; color:#8b949e">目标重量</div><div class="stat-val" style="color:var(--green)">180</div></div>
+        <div class="stat-box"><div style="font-size:0.7rem; color:#8b949e">初始值</div><div class="stat-val">280</div></div>
+        <div class="stat-box"><div style="font-size:0.7rem; color:#8b949e">当前最低</div><div id="curMin" class="stat-val">---</div></div>
+        <div class="stat-box"><div style="font-size:0.7rem; color:#8b949e">运营目标</div><div class="stat-val" style="color:var(--green)">180</div></div>
     </div>
 
     <div class="input-group">
-        <input type="number" id="weightIn" step="0.1" placeholder="输入当前测量值 (斤)">
-        <button onclick="save()">录入数据</button>
+        <input type="number" id="weightIn" step="0.1" placeholder="录入指标数据 (斤)">
+        <button onclick="save()">发布更新</button>
     </div>
 
     <div class="chart-container">
@@ -61,15 +61,15 @@
     </div>
 
     <table>
-        <thead><tr><th>日期</th><th>最低 (斤)</th><th>最高 (斤)</th></tr></thead>
+        <thead><tr><th>运营日期</th><th>最低 (斤)</th><th>最高 (斤)</th></tr></thead>
         <tbody id="logList"></tbody>
     </table>
     
-    <button class="reset-btn" onclick="resetAll()">清除系统所有历史缓存数据</button>
+    <button class="reset-btn" onclick="resetAll()">格式化所有本地运营数据</button>
 </div>
 
 <script>
-    let dataMap = JSON.parse(localStorage.getItem('weightMap_v2.5')) || {};
+    let dataMap = JSON.parse(localStorage.getItem('health_ops_v1')) || {};
     let chart;
 
     function save() {
@@ -87,7 +87,7 @@
     }
 
     function store() {
-        localStorage.setItem('weightMap_v2.5', JSON.stringify(dataMap));
+        localStorage.setItem('health_ops_v1', JSON.stringify(dataMap));
         document.getElementById('weightIn').value = '';
         render();
     }
@@ -115,8 +115,8 @@
             data: {
                 labels: sortedDates,
                 datasets: [
-                    { label: '最高', data: sortedDates.map(d => dataMap[d].max), borderColor: '#f85149', borderWidth: 1, pointRadius: 1, tension: 0.4 },
-                    { label: '最低', data: sortedDates.map(d => dataMap[d].min), borderColor: '#00d4ff', borderWidth: 2.5, fill: true, backgroundColor: 'rgba(0,212,255,0.05)', tension: 0.4 }
+                    { label: 'Max', data: sortedDates.map(d => dataMap[d].max), borderColor: '#f85149', borderWidth: 1, pointRadius: 1, tension: 0.4 },
+                    { label: 'Min', data: sortedDates.map(d => dataMap[d].min), borderColor: '#00d4ff', borderWidth: 2.5, fill: true, backgroundColor: 'rgba(0,212,255,0.05)', tension: 0.4 }
                 ]
             },
             options: {
@@ -129,12 +129,8 @@
                 plugins: { 
                     legend: { display: true, labels: { color: '#8b949e', font: { size: 10 } } },
                     zoom: {
-                        pan: { enabled: true, mode: 'xy', threshold: 10 },
-                        zoom: {
-                            wheel: { enabled: true, speed: 0.05 },
-                            pinch: { enabled: true },
-                            mode: 'xy'
-                        }
+                        pan: { enabled: true, mode: 'xy', threshold: 5 },
+                        zoom: { wheel: { enabled: true, speed: 0.08 }, pinch: { enabled: true }, mode: 'xy' }
                     }
                 }
             }
@@ -143,10 +139,10 @@
 
     function exportMarkdown() {
         const sortedDates = Object.keys(dataMap).sort((a,b) => new Date(a) - new Date(b));
-        let md = "| 日期 | 最低 (斤) | 最高 (斤) |\n| --- | --- | --- |\n";
+        let md = "| 日期 | 最低 | 最高 |\n| --- | --- | --- |\n";
         sortedDates.forEach(d => md += `| ${d} | ${dataMap[d].min} | ${dataMap[d].max} |\n`);
         const el = document.createElement('textarea'); el.value = md; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
-        alert("Markdown表格已存入剪贴板");
+        alert("Markdown 已就绪");
     }
 
     function exportCSV() {
@@ -154,10 +150,10 @@
         let csv = "\ufeff日期,最低(斤),最高(斤)\n";
         sortedDates.forEach(d => csv += `${d},${dataMap[d].min},${dataMap[d].max}\n`);
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `weight_log.csv`; link.click();
+        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `health_ops_data.csv`; link.click();
     }
 
-    function resetAll() { if(confirm("警告：这将永久删除所有记录，确认吗？")) { dataMap = {}; localStorage.clear(); render(); } }
+    function resetAll() { if(confirm("警告：确认清除所有历史运营数据？")) { dataMap = {}; localStorage.clear(); render(); } }
     render();
 </script>
 </body>
