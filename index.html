@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3063/3063600.png">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/color/512/michelangelo.png">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
@@ -43,7 +43,7 @@
         
         .monitoring-tag { 
             color: var(--active-green); font-size: 0.7rem; font-weight: bold; margin-top: 5px;
-            letter-spacing: 1px; animation: breathe 2s infinite; 
+            letter-spacing: 1.5px; animation: breathe 2s infinite; 
         }
         @keyframes breathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
         
@@ -84,11 +84,13 @@
             border: 1px solid var(--border); color: #8b949e; font-size: 0.65rem; 
             padding: 5px 10px; border-radius: 4px; background: transparent;
         }
+        /* 底部版本号 */
         .version-footer {
-            font-size: 0.6rem; color: #30363d; font-family: monospace;
+            font-size: 0.65rem; color: #30363d; font-family: monospace;
             padding-bottom: env(safe-area-inset-bottom);
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             text-align: center;
+            letter-spacing: 1px;
         }
     </style>
 </head>
@@ -96,13 +98,13 @@
 
 <div class="dashboard">
     <div class="header">
-        <div class="title">健康体重运营 system</div>
+        <div class="title">健康体重运营系统</div>
         <div class="monitoring-tag">● MONITORING...</div>
     </div>
 
     <div class="stats">
         <div class="stat-box"><div class="stat-label">初始</div><div class="stat-val">280</div></div>
-        <div class="stat-box"><div class="stat-label">当前记录</div><div id="curMin" class="stat-val">---</div></div>
+        <div class="stat-box"><div class="stat-label">当前</div><div id="curMin" class="stat-val">---</div></div>
         <div class="stat-box"><div class="stat-label">目标</div><div class="stat-val" style="color:var(--active-green)">180</div></div>
     </div>
 
@@ -110,7 +112,7 @@
         <div class="input-row">
             <input type="date" id="dateIn">
             <input type="number" id="weightIn" step="0.1" placeholder="斤">
-            <button class="pub-btn" onclick="save()">录入</button>
+            <button class="pub-btn" onclick="save()">发布更新</button>
         </div>
     </div>
 
@@ -127,9 +129,9 @@
 
     <div class="footer-tools">
         <button class="btn-tool" onclick="chart.resetZoom()">重置视图</button>
-        <button class="btn-tool" onclick="exportMarkdown()">MD导出</button>
-        <button class="btn-tool" onclick="exportCSV()">Excel导出</button>
-        <button class="btn-tool" style="color:var(--alert-red)" onclick="resetAll()">初始化</button>
+        <button class="btn-tool" onclick="exportMarkdown()">MD复制</button>
+        <button class="btn-tool" onclick="exportCSV()">表格导出</button>
+        <button class="btn-tool" style="color:var(--alert-red)" onclick="resetAll()">系统初始化</button>
     </div>
     
     <div class="version-footer">HEALTH OPS SYSTEM V1.1</div>
@@ -209,7 +211,7 @@
         let md = "| 日期 | 最低 | 最高 |\n| --- | --- | --- |\n";
         sortedDates.forEach(d => md += `| ${d} | ${dataMap[d].min} | ${dataMap[d].max} |\n`);
         const el = document.createElement('textarea'); el.value = md; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
-        alert("Markdown已复制");
+        alert("Markdown已复制到剪贴板");
     }
 
     function exportCSV() {
@@ -217,10 +219,10 @@
         let csv = "\ufeff日期,最低(斤),最高(斤)\n";
         sortedDates.forEach(d => csv += `${d},${dataMap[d].min},${dataMap[d].max}\n`);
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `health_ops_data.csv`; link.click();
+        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `health_ops_v1.1.csv`; link.click();
     }
 
-    function resetAll() { if(confirm("确定清空数据？")) { dataMap = {}; localStorage.clear(); render(); } }
+    function resetAll() { if(confirm("确定执行初始化？所有历史记录将永久清空。")) { dataMap = {}; localStorage.clear(); render(); } }
 </script>
 </body>
 </html>
