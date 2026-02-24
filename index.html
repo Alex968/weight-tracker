@@ -3,28 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>系统重构 V2.4 - 数据导出版</title>
+    <title>系统重构监控</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
     <style>
         :root { --green: #00ff41; --blue: #00d4ff; --red: #f85149; --bg: #0d1117; --card: #161b22; }
         body { background: var(--bg); color: #c9d1d9; font-family: 'PingFang SC', monospace; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
-        .dashboard { width: 100%; max-width: 800px; background: var(--card); border: 1px solid #30363d; border-radius: 12px; padding: 20px; box-shadow: 0 0 20px rgba(0,255,65,0.1); }
-        .header { border-left: 4px solid var(--green); padding-left: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-        .stat-box { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; text-align: center; }
-        .stat-val { font-size: 1.4rem; font-weight: bold; color: var(--blue); }
-        .input-group { display: flex; gap: 8px; margin-bottom: 20px; }
-        input { background: #010409; border: 1px solid #30363d; color: var(--green); padding: 12px; border-radius: 6px; flex: 1; outline: none; }
-        button { background: transparent; border: 1px solid var(--green); color: var(--green); padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        button:hover { background: var(--green); color: #000; }
-        .chart-container { height: 320px; margin-bottom: 20px; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; position: relative; }
-        .export-group { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
-        .btn-export { border-color: #8b949e; color: #8b949e; font-size: 0.8rem; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-top: 10px; }
-        th, td { padding: 12px 10px; border-bottom: 1px solid #21262d; text-align: left; }
-        .edit-input { width: 70px; background: #000; border: 1px solid var(--blue); color: #fff; padding: 5px; border-radius: 4px; border: none; }
+        .dashboard { width: 100%; max-width: 800px; background: var(--card); border: 1px solid #30363d; border-radius: 12px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .header { border-left: 4px solid var(--green); padding-left: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; }
+        .stat-box { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; text-align: center; border: 1px solid #21262d; }
+        .stat-val { font-size: 1.6rem; font-weight: bold; color: var(--blue); text-shadow: 0 0 10px rgba(0,212,255,0.3); }
+        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        input { background: #010409; border: 1px solid #30363d; color: var(--green); padding: 12px; border-radius: 8px; flex: 1; outline: none; font-size: 1rem; }
+        button { background: transparent; border: 1px solid var(--green); color: var(--green); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        button:hover { background: var(--green); color: #000; box-shadow: 0 0 15px var(--green); }
+        .chart-container { height: 380px; margin-bottom: 20px; background: rgba(0,0,0,0.25); border-radius: 10px; padding: 10px; border: 1px solid #21262d; cursor: crosshair; }
+        .action-group { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+        .btn-tool { border-color: #484f58; color: #8b949e; font-size: 0.75rem; padding: 6px 12px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { padding: 12px; border-bottom: 1px solid #21262d; text-align: left; }
+        .edit-input { width: 65px; background: transparent; border: 1px solid transparent; color: #fff; padding: 4px; border-radius: 4px; text-align: center; transition: 0.3s; }
+        .edit-input:focus { border-color: var(--blue); background: #000; outline: none; }
+        .reset-btn { width: 100%; margin-top: 40px; border-color: #3e0a0a; color: #6e7681; font-size: 0.7rem; border-style: dashed; }
     </style>
 </head>
 <body>
@@ -32,42 +34,42 @@
 <div class="dashboard">
     <div class="header">
         <div>
-            <h2 style="margin:0">系统重构监测中心</h2>
-            <small style="color:#8b949e">V2.4 数据备份模式</small>
+            <h2 style="margin:0; letter-spacing: 1px;">系统重构监控中心</h2>
+            <small style="color:#58a6ff">状态: 运行中...</small>
         </div>
-        <button style="font-size:0.7rem" onclick="chart.resetZoom()">重置缩放</button>
+        <button class="btn-tool" onclick="chart.resetZoom()">重置视图</button>
     </div>
 
     <div class="stats">
-        <div class="stat-box"><div style="font-size:0.7rem">初始 (斤)</div><div class="stat-val">280</div></div>
-        <div class="stat-box"><div style="font-size:0.7rem">今日最低</div><div id="curMin" class="stat-val">---</div></div>
-        <div class="stat-box" style="border:1px solid var(--green)"><div style="font-size:0.7rem">目标 (斤)</div><div class="stat-val" style="color:var(--green)">180</div></div>
+        <div class="stat-box"><div style="font-size:0.7rem; color:#8b949e">初始重量</div><div class="stat-val">280</div></div>
+        <div class="stat-box"><div style="font-size:0.7rem; color:#8b949e">今日最低</div><div id="curMin" class="stat-val">---</div></div>
+        <div class="stat-box"><div style="font-size:0.7rem; color:#8b949e">目标重量</div><div class="stat-val" style="color:var(--green)">180</div></div>
     </div>
 
     <div class="input-group">
-        <input type="number" id="weightIn" step="0.1" placeholder="录入体重 (斤)">
-        <button onclick="save()">录入</button>
+        <input type="number" id="weightIn" step="0.1" placeholder="输入当前测量值 (斤)">
+        <button onclick="save()">录入数据</button>
     </div>
 
     <div class="chart-container">
         <canvas id="myChart"></canvas>
     </div>
 
-    <div class="export-group">
-        <button class="btn-export" onclick="exportMarkdown()">导出 Markdown</button>
-        <button class="btn-export" onclick="exportCSV()">导出 Excel (CSV)</button>
+    <div class="action-group">
+        <button class="btn-tool" onclick="exportMarkdown()">复制 MD 表格</button>
+        <button class="btn-tool" onclick="exportCSV()">导出 Excel</button>
     </div>
 
     <table>
-        <thead><tr><th>日期</th><th>最小值 (斤)</th><th>最大值 (斤)</th></tr></thead>
+        <thead><tr><th>日期</th><th>最低 (斤)</th><th>最高 (斤)</th></tr></thead>
         <tbody id="logList"></tbody>
     </table>
     
-    <button onclick="resetAll()" style="margin-top:40px; border-color:var(--red); color:var(--red); font-size:0.7rem; width:100%">清空本地存储</button>
+    <button class="reset-btn" onclick="resetAll()">清除系统所有历史缓存数据</button>
 </div>
 
 <script>
-    let dataMap = JSON.parse(localStorage.getItem('weightMap_v2.4')) || {};
+    let dataMap = JSON.parse(localStorage.getItem('weightMap_v2.5')) || {};
     let chart;
 
     function save() {
@@ -85,7 +87,7 @@
     }
 
     function store() {
-        localStorage.setItem('weightMap_v2.4', JSON.stringify(dataMap));
+        localStorage.setItem('weightMap_v2.5', JSON.stringify(dataMap));
         document.getElementById('weightIn').value = '';
         render();
     }
@@ -98,7 +100,7 @@
         body.innerHTML = '';
         displayDates.forEach(d => {
             body.innerHTML += `<tr>
-                <td>${d}</td>
+                <td style="color:#8b949e">${d}</td>
                 <td><input class="edit-input" type="number" step="0.1" value="${dataMap[d].min}" onchange="updateVal('${d}','min',this.value)"></td>
                 <td><input class="edit-input" type="number" step="0.1" value="${dataMap[d].max}" onchange="updateVal('${d}','max',this.value)"></td>
             </tr>`;
@@ -113,53 +115,49 @@
             data: {
                 labels: sortedDates,
                 datasets: [
-                    { label: '最高', data: sortedDates.map(d => dataMap[d].max), borderColor: '#f85149', borderWidth: 1, pointRadius: 1, tension: 0.3 },
-                    { label: '最低', data: sortedDates.map(d => dataMap[d].min), borderColor: '#00d4ff', borderWidth: 2, fill: true, backgroundColor: 'rgba(0,212,255,0.05)', tension: 0.3 }
+                    { label: '最高', data: sortedDates.map(d => dataMap[d].max), borderColor: '#f85149', borderWidth: 1, pointRadius: 1, tension: 0.4 },
+                    { label: '最低', data: sortedDates.map(d => dataMap[d].min), borderColor: '#00d4ff', borderWidth: 2.5, fill: true, backgroundColor: 'rgba(0,212,255,0.05)', tension: 0.4 }
                 ]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
-                scales: { y: { suggestedMin: 170, grid: { color: '#21262d' } }, x: { grid: { display: false } } },
-                plugins: { zoom: { pan: { enabled: true, mode: 'x' }, zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' } } }
+                interaction: { intersect: false, mode: 'index' },
+                scales: { 
+                    y: { suggestedMin: 170, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#484f58' } }, 
+                    x: { grid: { display: false }, ticks: { color: '#484f58' } } 
+                },
+                plugins: { 
+                    legend: { display: true, labels: { color: '#8b949e', font: { size: 10 } } },
+                    zoom: {
+                        pan: { enabled: true, mode: 'xy', threshold: 10 },
+                        zoom: {
+                            wheel: { enabled: true, speed: 0.05 },
+                            pinch: { enabled: true },
+                            mode: 'xy'
+                        }
+                    }
+                }
             }
         });
     }
 
-    // 导出 Markdown
     function exportMarkdown() {
         const sortedDates = Object.keys(dataMap).sort((a,b) => new Date(a) - new Date(b));
-        let md = "| 日期 | 最小值 (斤) | 最大值 (斤) |\n| --- | --- | --- |\n";
-        sortedDates.forEach(d => {
-            md += `| ${d} | ${dataMap[d].min} | ${dataMap[d].max} |\n`;
-        });
-        copyToClipboard(md, "Markdown 数据已复制到剪贴板！");
+        let md = "| 日期 | 最低 (斤) | 最高 (斤) |\n| --- | --- | --- |\n";
+        sortedDates.forEach(d => md += `| ${d} | ${dataMap[d].min} | ${dataMap[d].max} |\n`);
+        const el = document.createElement('textarea'); el.value = md; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
+        alert("Markdown表格已存入剪贴板");
     }
 
-    // 导出 CSV (Excel)
     function exportCSV() {
         const sortedDates = Object.keys(dataMap).sort((a,b) => new Date(a) - new Date(b));
-        let csv = "\ufeff日期,最小值(斤),最大值(斤)\n";
-        sortedDates.forEach(d => {
-            csv += `${d},${dataMap[d].min},${dataMap[d].max}\n`;
-        });
+        let csv = "\ufeff日期,最低(斤),最高(斤)\n";
+        sortedDates.forEach(d => csv += `${d},${dataMap[d].min},${dataMap[d].max}\n`);
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `weight_data_${new Date().toLocaleDateString()}.csv`;
-        link.click();
+        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `weight_log.csv`; link.click();
     }
 
-    function copyToClipboard(text, msg) {
-        const el = document.createElement('textarea');
-        el.value = text;
-        document.body.appendChild(el);
-        el.select();
-        document.execCommand('copy');
-        document.body.removeChild(el);
-        alert(msg);
-    }
-
-    function resetAll() { if(confirm("确定永久清空？")) { dataMap = {}; localStorage.clear(); render(); } }
+    function resetAll() { if(confirm("警告：这将永久删除所有记录，确认吗？")) { dataMap = {}; localStorage.clear(); render(); } }
     render();
 </script>
 </body>
