@@ -35,7 +35,6 @@
             background: var(--bg);
         }
 
-        /* 上半部分：固定区 */
         .top-fixed-section {
             flex-shrink: 0;
             padding: env(safe-area-inset-top) 15px 0 15px;
@@ -51,46 +50,30 @@
         .stat-label { font-size: 0.6rem; color: #788291; margin-bottom: 4px; }
         .stat-val { font-size: 1.1rem; font-weight: 800; color: var(--neon-blue); }
 
-        /* 录入区：布局加固修复 */
         .input-area { 
             background: rgba(0, 255, 157, 0.05); padding: 12px; 
             border-radius: 10px; margin-bottom: 10px; border: 1px solid rgba(0, 255, 157, 0.1); 
         }
-        .input-row { 
-            display: flex; 
-            gap: 6px; 
-            align-items: center; 
-            justify-content: space-between;
-        }
+        .input-row { display: flex; gap: 6px; align-items: center; }
         
-        /* 调整输入框比例，确保按钮有空间 */
         #dateIn { flex: 1.4; min-width: 0; }
         #weightIn { flex: 1; min-width: 0; }
-        
-        input { 
-            background: #000; border: 1px solid var(--border); color: #fff; 
-            padding: 10px 5px; border-radius: 6px; outline: none; font-size: 0.85rem;
-        }
+        input { background: #000; border: 1px solid var(--border); color: #fff; padding: 10px 5px; border-radius: 6px; outline: none; font-size: 0.85rem; }
         
         .pub-btn { 
-            flex: 0 0 60px; /* 强制按钮宽度为60像素，不许收缩 */
+            flex: 0 0 65px; 
             background: var(--neon-green); color: #000; border: none; 
             height: 38px; border-radius: 6px; cursor: pointer; 
             font-weight: bold; font-size: 0.85rem;
-            display: flex; align-items: center; justify-content: center;
         }
 
-        /* 下半部分：滚动区 */
         .bottom-scroll-section {
-            flex: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
+            flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
             padding: 10px 15px env(safe-area-inset-bottom) 15px;
         }
 
         .chart-container { 
-            height: 180px; 
-            background: rgba(0,0,0,0.2); 
+            height: 200px; background: rgba(0,0,0,0.2); 
             border-radius: 12px; padding: 10px; margin-bottom: 15px;
             border: 1px solid var(--border); position: relative;
         }
@@ -102,7 +85,6 @@
 
         .footer-tools { display: flex; gap: 8px; padding: 20px 0; justify-content: center; }
         .btn-tool { border: 1px solid var(--border); color: #788291; font-size: 0.65rem; padding: 4px 8px; border-radius: 4px; background: transparent; }
-        
         .version-footer { font-size: 0.6rem; color: #232936; text-align: center; padding-bottom: 10px; letter-spacing: 1px; }
     </style>
 </head>
@@ -121,7 +103,7 @@
         <div class="input-area">
             <div class="input-row">
                 <input type="date" id="dateIn">
-                <input type="number" id="weightIn" step="0.1" placeholder="体重/斤">
+                <input type="number" id="weightIn" step="0.1" placeholder="斤">
                 <button class="pub-btn" onclick="save()">发布</button>
             </div>
         </div>
@@ -133,22 +115,22 @@
         </div>
 
         <table>
-            <thead><tr><th>运营日期</th><th>最低</th><th>最高</th></tr></thead>
+            <thead><tr><th>日期</th><th>最低</th><th>最高</th></tr></thead>
             <tbody id="logList"></tbody>
         </table>
 
         <div class="footer-tools">
-            <button class="btn-tool" onclick="chart.resetZoom()">重置视图</button>
+            <button class="btn-tool" onclick="resetZoom()">重置视图</button>
             <button class="btn-tool" onclick="exportCSV()">导出</button>
             <button class="btn-tool" style="color:var(--neon-blue)" onclick="resetAll()">清空</button>
         </div>
-        
-        <div class="version-footer">SYSTEM_V1.3_FINAL_NOTEBOOK</div>
+        <div class="version-footer">V1.0</div>
     </div>
 </div>
 
 <script>
-    let dataMap = JSON.parse(localStorage.getItem('health_ops_v1.3')) || {};
+    // 统一存储键名，确保数据连续性
+    let dataMap = JSON.parse(localStorage.getItem('health_ops_final')) || {};
     let chart;
 
     window.onload = () => {
@@ -161,58 +143,40 @@
         const val = parseFloat(document.getElementById('weightIn').value);
         const dateRaw = document.getElementById('dateIn').value;
         if(!val || val <= 0 || !dateRaw) return; 
-        
         const targetDate = new Date(dateRaw).toLocaleDateString('zh-CN');
-        if(!dataMap[targetDate]) { 
-            dataMap[targetDate] = { min: val, max: val }; 
-        } else { 
-            dataMap[targetDate].min = Math.min(dataMap[targetDate].min, val); 
-            dataMap[targetDate].max = Math.max(dataMap[targetDate].max, val); 
-        }
-        localStorage.setItem('health_ops_v1.3', JSON.stringify(dataMap));
+        if(!dataMap[targetDate]) { dataMap[targetDate] = { min: val, max: val }; } 
+        else { dataMap[targetDate].min = Math.min(dataMap[targetDate].min, val); dataMap[targetDate].max = Math.max(dataMap[targetDate].max, val); }
+        localStorage.setItem('health_ops_final', JSON.stringify(dataMap));
         document.getElementById('weightIn').value = '';
         render();
     }
 
     function updateVal(date, type, val) {
         const nVal = parseFloat(val);
-        if(!isNaN(nVal) && nVal > 0) { 
-            dataMap[date][type] = nVal; 
-            localStorage.setItem('health_ops_v1.3', JSON.stringify(dataMap)); 
-            render(); 
-        }
+        if(!isNaN(nVal) && nVal > 0) { dataMap[date][type] = nVal; localStorage.setItem('health_ops_final', JSON.stringify(dataMap)); render(); }
     }
 
     function render() {
         const body = document.getElementById('logList');
-        const sortedDates = Object.keys(dataMap).sort((a,b) => new Date(a) - new Date(b));
-        
+        const dates = Object.keys(dataMap).sort((a,b) => new Date(a) - new Date(b));
         let globalMax = 0;
-        sortedDates.forEach(d => { if(dataMap[d].max > globalMax) globalMax = dataMap[d].max; });
-        
+        dates.forEach(d => { if(dataMap[d].max > globalMax) globalMax = dataMap[d].max; });
         body.innerHTML = '';
-        [...sortedDates].reverse().forEach(d => {
-            body.innerHTML += `<tr>
-                <td style="color:#788291">${d}</td>
+        [...dates].reverse().forEach(d => {
+            body.innerHTML += `<tr><td>${d}</td>
                 <td><input class="edit-input" type="number" step="0.1" value="${dataMap[d].min}" onchange="updateVal('${d}','min',this.value)"></td>
-                <td><input class="edit-input" type="number" step="0.1" value="${dataMap[d].max}" onchange="updateVal('${d}','max',this.value)"></td>
-            </tr>`;
+                <td><input class="edit-input" type="number" step="0.1" value="${dataMap[d].max}" onchange="updateVal('${d}','max',this.value)"></td></tr>`;
         });
-
-        document.getElementById('maxWeight').innerText = globalMax > 0 ? globalMax : '---';
-        if(sortedDates.length > 0) {
-            document.getElementById('curMin').innerText = dataMap[sortedDates[sortedDates.length-1]].min;
-        }
+        document.getElementById('maxWeight').innerText = globalMax || '---';
+        if(dates.length > 0) document.getElementById('curMin').innerText = dataMap[dates[dates.length-1]].min;
 
         const ctx = document.getElementById('myChart').getContext('2d');
         if(chart) chart.destroy();
         chart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: sortedDates,
-                datasets: [
-                    { label: '最低', data: sortedDates.map(d => dataMap[d].min), borderColor: '#00ff9d', borderWidth: 2, fill: true, backgroundColor: 'rgba(0, 255, 157, 0.05)', tension: 0.3 }
-                ]
+                labels: dates,
+                datasets: [{ label: '最低', data: dates.map(d => dataMap[d].min), borderColor: '#00ff9d', borderWidth: 2, fill: true, backgroundColor: 'rgba(0, 255, 157, 0.05)', tension: 0.3 }]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
@@ -220,19 +184,25 @@
                     y: { min: 0, beginAtZero: true, grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#4a5568', font: { size: 10 } } },
                     x: { ticks: { color: '#4a5568', font: { size: 10 } } }
                 },
-                plugins: { legend: { display: false } }
+                plugins: {
+                    legend: { display: false },
+                    zoom: {
+                        pan: { enabled: true, mode: 'x' },
+                        zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
+                    }
+                }
             }
         });
     }
 
+    function resetZoom() { if(chart) chart.resetZoom(); }
     function exportCSV() {
-        const sortedDates = Object.keys(dataMap).sort((a,b) => new Date(a) - new Date(b));
+        const dates = Object.keys(dataMap).sort((a,b) => new Date(a) - new Date(b));
         let csv = "\ufeff日期,最低,最高\n";
-        sortedDates.forEach(d => csv += `${d},${dataMap[d].min},${dataMap[d].max}\n`);
+        dates.forEach(d => csv += `${d},${dataMap[d].min},${dataMap[d].max}\n`);
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `健康报表.csv`; link.click();
+        const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `体重记录.csv`; link.click();
     }
-
     function resetAll() { if(confirm("确定清空数据？")) { dataMap = {}; localStorage.clear(); render(); } }
 </script>
 </body>
